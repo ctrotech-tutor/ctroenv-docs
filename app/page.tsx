@@ -1,65 +1,125 @@
-import Image from "next/image";
+import Link from "next/link"
+import { Logo } from "@/components/logo"
+import { ArrowRight, ShieldCheck, Zap, Puzzle, Terminal } from "lucide-react"
+
+const features = [
+  {
+    icon: ShieldCheck,
+    title: "Zero Runtime Dependencies",
+    description: "Core and shared packages are dependency-free. Small bundle, big confidence.",
+  },
+  {
+    icon: Zap,
+    title: "Full TypeScript Inference",
+    description: "Infer precise types from your schema. No more stringly-typed process.env access.",
+  },
+  {
+    icon: Terminal,
+    title: "Beautiful CLI & Errors",
+    description: "Rich error messages with suggestions. A CLI that validates, generates, and documents.",
+  },
+  {
+    icon: Puzzle,
+    title: "Framework Adapters",
+    description: "Plug into Node.js, Vite, and Next.js. One schema works everywhere.",
+  },
+]
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6 sm:py-32 lg:px-8">
+      <div className="flex flex-col items-center text-center">
+        <Logo size={48} className="mb-6" />
+        <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-6xl">
+          Type-Safe{" "}
+          <span className="bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">
+            Environment Variables
+          </span>{" "}
+          for TypeScript
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
+          Define, validate, and infer types for environment variables with zero runtime dependencies.
+          Beautiful error messages, framework adapters, and CLI tooling.
+        </p>
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+          <Link
+            href="/docs/getting-started"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Get Started
+            <ArrowRight className="size-4" />
+          </Link>
+          <Link
+            href="/docs/core/define-env"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-background px-6 text-sm font-medium hover:bg-accent transition-colors"
+          >
+            API Reference
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+      </div>
+
+      <div className="mt-24 grid gap-8 sm:grid-cols-2">
+        {features.map((feature) => (
+          <div
+            key={feature.title}
+            className="rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/50"
+          >
+            <feature.icon className="mb-4 size-8 text-primary" />
+            <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
+            <p className="text-sm text-muted-foreground">{feature.description}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-24">
+        <h2 className="mb-8 text-center text-2xl font-bold">Quick Example</h2>
+        <div className="overflow-hidden rounded-xl border border-border bg-zinc-950 dark:bg-zinc-900">
+          <div className="border-b border-border px-4 py-2 text-xs text-muted-foreground">
+            env.ts
+          </div>
+          <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
+            <code className="font-mono">
+              {`import { defineEnv, string, number } from "@ctroenv/core"
+
+const env = defineEnv({
+  DATABASE_URL: string().url(),
+  PORT: number().port().default(3000),
+  JWT_SECRET: string().secret(),
+  NODE_ENV: pick(["dev", "staging", "prod"]),
+})
+
+// TypeScript infers:
+//   env.DATABASE_URL → string
+//   env.PORT → number
+//   env.JWT_SECRET → string
+//   env.NODE_ENV → "dev" | "staging" | "prod"`}
+            </code>
+          </pre>
+        </div>
+      </div>
+
+      <div className="mt-24 text-center">
+        <p className="text-sm text-muted-foreground">
+          MIT License &middot; Published on{" "}
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://npmjs.com/package/@ctroenv/core"
             target="_blank"
             rel="noopener noreferrer"
+            className="underline underline-offset-4 hover:text-foreground"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
+            npm
+          </a>{" "}
+          &middot;{" "}
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://github.com/ctrotech-tutor/ctroenv"
             target="_blank"
             rel="noopener noreferrer"
+            className="underline underline-offset-4 hover:text-foreground"
           >
-            Documentation
+            GitHub
           </a>
-        </div>
-      </main>
+        </p>
+      </div>
     </div>
-  );
+  )
 }
