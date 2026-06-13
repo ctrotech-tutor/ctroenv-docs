@@ -1,0 +1,59 @@
+# v1.0.1 — Polish & Developer Experience
+
+This patch release focuses on error message refinement, performance benchmarks, and
+bundle size optimization.
+
+## Error Message Refinement
+
+Error messages have been completely overhauled:
+
+- **Centralized factory**: Consistent error creation across all validators
+- **Richer formatting**: Errors are grouped by category (Missing vs Invalid) with colored hints
+- **Actionable suggestions**: Every error includes a suggested fix
+- **NO_COLOR support**: Respects `NO_COLOR`, `CI`, and `TERM=dumb` environment variables
+
+```txt
+● Missing required (2)
+  DATABASE_URL
+    → Add this variable to your .env file or set it in the environment.
+  JWT_SECRET
+    → Add this variable to your .env file or set it in the environment.
+
+✗ Invalid (1)
+  PORT
+    → Expected a number, received "not-a-number"
+    → Ensure the value is a numeric string or number.
+```
+
+## Performance
+
+Core validation benchmarks:
+
+| Scenario | Ops/sec |
+|---|---|
+| 5 fields (pass) | ~253,000 |
+| 5 fields (fail) | ~10,600 |
+| 20 fields (pass) | ~69,000 |
+| CLI parse (3 fields) | ~507,000 |
+
+## Bundle Size
+
+Zero dependency core remains tiny:
+
+| Package | Size (gzipped) |
+|---|---|
+| `@ctroenv/core` | 4.05 KB |
+| `@ctroenv/cli` (binary) | 4 KB |
+| `@ctroenv/node` | 508 B |
+| `@ctroenv/vite` | 458 B |
+| `@ctroenv/nextjs` | 628 B |
+
+## Validator Chainability Fix
+
+`refine()` now preserves type-specific methods via `Object.assign`, so chains like
+`number().min(0).max(100)` work correctly.
+
+## Full Changelog
+
+See the [GitHub Release](https://github.com/ctrotech-tutor/ctroenv/releases/tag/v1.0.1)
+for the complete list of changes.

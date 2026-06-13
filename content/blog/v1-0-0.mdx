@@ -1,0 +1,54 @@
+# v1.0.0 — Type-Safe Environment Variables for TypeScript
+
+We're excited to announce the initial release of CtroEnv — a TypeScript-first environment
+variable management toolkit.
+
+## What is CtroEnv?
+
+CtroEnv lets you define, validate, and infer types for environment variables with zero
+runtime dependencies. It's designed to be the simplest, most type-safe way to handle
+`process.env` in your TypeScript applications.
+
+## Why Another Env Library?
+
+Existing solutions have compromises:
+
+- **dotenv**: Loads `.env` files but provides no validation or type safety
+- **t3-env**: Great pattern but requires Zod (50KB+ dependency)
+- **envalid**: Solid but lacks TypeScript-native inference and modern DX
+
+CtroEnv is built from scratch with zero dependencies, TypeScript-native inference, and
+beautiful error messages.
+
+## What's Included
+
+| Package | Description |
+|---|---|
+| `@ctroenv/core` | Schema engine with validators and type inference |
+| `@ctroenv/shared` | Internal shared utilities |
+| `@ctroenv/cli` | CLI tooling (validate, generate, check, docs, init) |
+| `@ctroenv/node` | Node.js .env file loading |
+| `@ctroenv/vite` | Vite build-time validation plugin |
+| `@ctroenv/nextjs` | Next.js client/server env splitting |
+
+## Example
+
+```ts
+import { defineEnv, string, number, pick } from "@ctroenv/core"
+
+const env = defineEnv({
+  DATABASE_URL: string().url(),
+  PORT: number().port().default(3000),
+  NODE_ENV: pick(["dev", "staging", "prod"]),
+  JWT_SECRET: string().secret().min(32),
+})
+```
+
+## Get Started
+
+```bash
+npm install @ctroenv/core
+```
+
+Documentation: [ctroenv.vercel.app](https://ctroenv.vercel.app)
+GitHub: [github.com/ctrotech-tutor/ctroenv](https://github.com/ctrotech-tutor/ctroenv)
