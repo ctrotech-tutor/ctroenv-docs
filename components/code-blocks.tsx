@@ -22,7 +22,7 @@ export function CodeBlocks({ children }: { children: React.ReactNode }) {
 
       pre.classList.add("group")
       pre.style.position = "relative"
-      pre.style.paddingTop = "2.5rem"
+      pre.style.paddingTop = window.innerWidth < 768 ? "2rem" : "2.5rem"
 
       const header = document.createElement("div")
       header.className =

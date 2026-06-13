@@ -29,8 +29,8 @@ export function StickyMobileBar({ toc }: StickyMobileBarProps) {
     <div
       key={pathname}
       className={cn(
-        "sticky z-40 flex items-center gap-2 border-b border-border/50 bg-background/80 backdrop-blur-sm px-4 py-2 md:hidden transition-all duration-200",
-        navbarVisible ? "top-14" : "top-0"
+        "sticky z-40 flex items-center gap-2 border-b border-border/50 bg-background/80 px-4 py-2 md:hidden transition-transform duration-200",
+        navbarVisible ? "translate-y-0" : "-translate-y-14"
       )}
     >
       <Drawer open={sidebarOpen} onOpenChange={setSidebarOpen} direction="left">

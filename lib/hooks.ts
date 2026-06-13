@@ -7,11 +7,13 @@ export function useScrollDirection() {
   const pathname = usePathname()
   const [visible, setVisible] = useState(true)
   const lastScrollY = useRef(0)
+  const ticking = useRef(false)
 
   const isDocsPage = pathname.startsWith("/docs")
 
   useEffect(() => {
     lastScrollY.current = 0
+    ticking.current = false
     Promise.resolve().then(() => setVisible(true))
   }, [pathname])
 
@@ -22,16 +24,21 @@ export function useScrollDirection() {
     const handleResize = () => {
       isMobile = window.innerWidth < 768
     }
-    window.addEventListener("resize", handleResize)
+    window.addEventListener("resize", handleResize, { passive: true })
 
     const handleScroll = () => {
-      if (!isMobile) {
-        setVisible(true)
-        return
-      }
-      const current = window.scrollY
-      setVisible(current < lastScrollY.current || current < 50)
-      lastScrollY.current = current
+      if (ticking.current) return
+      ticking.current = true
+      requestAnimationFrame(() => {
+        if (!isMobile) {
+          setVisible(true)
+        } else {
+          const current = window.scrollY
+          setVisible(current < lastScrollY.current || current < 50)
+          lastScrollY.current = current
+        }
+        ticking.current = false
+      })
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
