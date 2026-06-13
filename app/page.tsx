@@ -61,8 +61,8 @@ export default function Home() {
         <div className="flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-4 py-1.5 text-sm mb-8">
             <span className="relative flex size-2">
-              <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75" />
-              <span className="relative rounded-full size-2 bg-green-500" />
+              <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-75" />
+              <span className="relative rounded-full size-2 bg-primary" />
             </span>
             <span className="text-muted-foreground">v1.0.1 — Latest release</span>
           </div>
