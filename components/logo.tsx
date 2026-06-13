@@ -18,27 +18,34 @@ export function Logo({ size = 32, className, ...props }: LogoProps) {
       {...props}
     >
       <defs>
-        <linearGradient id="logo-gradient" x1="16" y1="2" x2="16" y2="30">
-          <stop stopColor="#4F46E5" />
-          <stop offset="1" stopColor="#7C3AED" />
+        <linearGradient id="logo-g" x1="16" y1="2" x2="16" y2="30">
+          <stop stopColor="#14b8a6" />
+          <stop offset="1" stopColor="#06b6d4" />
         </linearGradient>
       </defs>
       <path
-        d="M16 2L4 9v6c0 7.5 5.1 14.5 12 16 6.9-1.5 12-8.5 12-16V9L16 2z"
-        fill="url(#logo-gradient)"
+        d="M16 2l10 5.773v11.547c0 4.041-2.236 7.724-5.774 9.51L16 30l-4.226-2.17C8.236 27.044 6 23.361 6 19.32V7.773L16 2z"
+        fill="url(#logo-g)"
       />
       <path
-        d="M12 17l3 3 6-7"
+        d="M12.5 16a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
+        fill="white"
+        opacity="0.2"
+      />
+      <path
+        d="M14 13.5l2.5 2.5-2.5 2.5"
         stroke="white"
-        strokeWidth="2.5"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        strokeOpacity="0.7"
       />
+      <circle cx="16" cy="16" r="1" fill="white" />
     </svg>
   )
 }
 
-export function LogoMark({ size = 32, className, ...props }: LogoProps) {
+export function LogoMark({ size = 16, className, ...props }: LogoProps) {
   return (
     <svg
       width={size}
@@ -52,16 +59,10 @@ export function LogoMark({ size = 32, className, ...props }: LogoProps) {
       {...props}
     >
       <path
-        d="M16 2L4 9v6c0 7.5 5.1 14.5 12 16 6.9-1.5 12-8.5 12-16V9L16 2z"
-        fill="#4F46E5"
+        d="M16 2l10 5.773v11.547c0 4.041-2.236 7.724-5.774 9.51L16 30l-4.226-2.17C8.236 27.044 6 23.361 6 19.32V7.773L16 2z"
+        fill="#14b8a6"
       />
-      <path
-        d="M12 17l3 3 6-7"
-        stroke="white"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <circle cx="16" cy="16" r="3" fill="white" />
     </svg>
   )
 }

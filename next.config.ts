@@ -1,28 +1,12 @@
 import type { NextConfig } from "next"
-import createMDX from "@next/mdx"
 
 const nextConfig: NextConfig = {
-  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  images: {
+    unoptimized: true,
+  },
   turbopack: {
     root: process.cwd(),
   },
 }
 
-const withMDX = createMDX({
-  options: {
-    remarkPlugins: ["remark-gfm"],
-    rehypePlugins: [
-      [
-        "rehype-pretty-code",
-        {
-          theme: {
-            light: "github-light",
-            dark: "github-dark",
-          },
-        },
-      ],
-    ],
-  },
-})
-
-export default withMDX(nextConfig)
+export default nextConfig
