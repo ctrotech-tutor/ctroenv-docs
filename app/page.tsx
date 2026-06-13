@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { Logo } from "@/components/logo"
-import { HomeCodeBlock } from "@/components/home-code-block"
 import {
   ArrowRight,
   ShieldCheck,
@@ -142,7 +141,27 @@ export default function Home() {
         {/* Quick Example */}
         <div className="mt-24">
           <h2 className="mb-8 text-center text-2xl font-bold">Quick Example</h2>
-          <HomeCodeBlock />
+          <div className="overflow-hidden rounded-xl border border-border">
+            <div className="border-b border-border bg-muted px-4 py-2 text-xs text-muted-foreground">
+              env.ts
+            </div>
+            <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
+              <code>{`import { defineEnv, string, number, pick } from "@ctroenv/core"
+
+const env = defineEnv({
+  DATABASE_URL: string().url(),
+  PORT: number().port().default(3000),
+  JWT_SECRET: string().secret(),
+  NODE_ENV: pick(["dev", "staging", "prod"]),
+})
+
+// TypeScript infers:
+//   env.DATABASE_URL → string
+//   env.PORT → number
+//   env.JWT_SECRET → string
+//   env.NODE_ENV → "dev" | "staging" | "prod"`}</code>
+            </pre>
+          </div>
         </div>
 
         {/* Packages */}
