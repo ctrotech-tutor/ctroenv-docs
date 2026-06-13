@@ -35,7 +35,7 @@ export default async function BlogPost({
 
   const Content = post.content
   return (
-    <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+    <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8 prose prose-gray dark:prose-invert">
       <Content />
     </article>
   )

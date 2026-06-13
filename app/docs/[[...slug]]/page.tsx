@@ -67,5 +67,9 @@ export default async function DocPage({
   const path = slug?.join("/") || "getting-started"
   const Content = pageMap[path]
   if (!Content) notFound()
-  return <Content />
+  return (
+    <div className="prose prose-gray dark:prose-invert mx-auto max-w-3xl px-4 py-12 sm:px-6 overflow-x-auto">
+      <Content />
+    </div>
+  )
 }
