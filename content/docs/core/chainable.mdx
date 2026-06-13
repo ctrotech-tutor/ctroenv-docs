@@ -1,0 +1,125 @@
+# Chainable Methods
+
+Every validator provides a set of common methods for controlling behavior, metadata, and
+value handling. These are available on all validators: `string()`, `number()`, `boolean()`,
+and `pick()`.
+
+## Signature
+
+```ts
+interface ChainableMethods<T> {
+  optional(): Validator<T | undefined> & ChainableMethods<T | undefined>
+  default(value: T): Validator<T> & ChainableMethods<T>
+  describe(text: string): Validator<T> & ChainableMethods<T>
+  secret(): Validator<T> & ChainableMethods<T>
+  validate(
+    fn: (value: T, context: { key: string; path: readonly string[] }) => string | undefined,
+  ): Validator<T> & ChainableMethods<T>
+}
+```
+
+## .optional()
+
+Marks the variable as optional. When the environment variable is not set, the value will be
+`undefined` instead of causing a missing-required error.
+
+```ts
+const env = defineEnv({
+  CACHE_TTL: number().optional(),
+})
+// env.CACHE_TTL: number | undefined
+// If CACHE_TTL is not set, env.CACHE_TTL is undefined
+// If CACHE_TTL is set to "3000", env.CACHE_TTL is 3000
+```
+
+TypeScript infers `T | undefined`, so you must check for undefined before using the value:
+
+```ts
+if (env.CACHE_TTL !== undefined) {
+  // env.CACHE_TTL is now number
+}
+```
+
+## .default(value)
+
+Provides a fallback value when the environment variable is not set. Overrides any
+`.optional()` setting — the value is always present.
+
+```ts
+const env = defineEnv({
+  PORT: number().port().default(3000),
+})
+// env.PORT: number
+// If PORT is not set, env.PORT is 3000
+// If PORT is set to "4000", env.PORT is 4000
+```
+
+TypeScript infers `T` (non-nullable) because the default ensures the value always exists.
+
+## .describe(text)
+
+Attaches a human-readable description to the validator. This description appears in:
+
+- Error messages: `"Missing required environment variable: DATABASE_URL -- Primary database connection"`
+- CLI output: Shown in the `ctroenv docs` command output
+- Generated `.env.example` files: Displayed as comments
+
+```ts
+const env = defineEnv({
+  DATABASE_URL: string().url().describe("Primary PostgreSQL database connection string"),
+  JWT_SECRET: string().secret().describe("Secret key for JWT token signing"),
+})
+```
+
+## .secret()
+
+Marks the variable as sensitive. Secret values are:
+
+- **Masked in CLI output**: Shown as `••••••••` instead of the actual value
+- **Masked in generated docs**: The value is excluded from `.env.example` content
+- **Available at runtime**: The actual value is still accessible in code
+
+```ts
+const env = defineEnv({
+  JWT_SECRET: string().secret(),
+  API_KEY: string().secret().describe("Third-party API key"),
+})
+```
+
+## .validate(fn)
+
+Adds a custom validation function. The function receives the parsed value and a context
+object. Return `undefined` to pass, or a string error message to fail.
+
+```ts
+const env = defineEnv({
+  API_KEY: string().validate((value, { key }) => {
+    if (!value.startsWith("sk_")) {
+      return `${key} must start with "sk_"`
+    }
+  }),
+})
+```
+
+The context provides:
+
+| Field | Type | Description |
+|---|---|---|
+| `key` | `string` | The environment variable name |
+| `path` | `readonly string[]` | The full path to the value (for nested schemas) |
+
+This enables conditional validation based on other values:
+
+```ts
+const env = defineEnv({
+  NODE_ENV: pick(["dev", "prod"]),
+  DATABASE_URL: string().url().validate((value, { key }) => {
+    if (env.NODE_ENV === "prod" && !value.includes("replica")) {
+      return "Production should use a replica URL"
+    }
+  }),
+})
+```
+
+> Note: The validate function runs after type checking and other refinements. The value
+> is guaranteed to be of the correct type.

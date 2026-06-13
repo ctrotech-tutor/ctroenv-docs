@@ -1,0 +1,130 @@
+# Core Concepts
+
+CtroEnv is built around three core concepts: **validators**, **schemas**, and **defineEnv()**.
+
+## Validators
+
+A validator is a function that takes an input value and either returns a parsed value or
+collects errors. Each validator has a specific type and can be refined with chainable methods.
+
+CtroEnv provides four built-in validators:
+
+| Validator | Type | Description |
+|---|---|---|
+| `string()` | `string` | Accepts string values |
+| `number()` | `number` | Accepts numbers and numeric strings (coerces) |
+| `boolean()` | `boolean` | Accepts booleans, "true"/"false", "1"/"0" (coerces) |
+| `pick([...])` | `"a" \| "b" \| ...` | Accepts only specific string values |
+
+### Type Coercion
+
+- **`string()`**: Only accepts actual strings. Non-strings produce a type error.
+- **`number()`**: Accepts `number` values and numeric strings like `"42"`. Rejects `NaN`,
+  `Infinity`, empty strings, and non-numeric strings.
+- **`boolean()`**: Accepts `true`, `false`, numbers `1`/`0`, and strings `"true"`/`"false"`/
+  `"1"`/`"0"` (case-insensitive, trimmed).
+- **`pick()`**: Only accepts exact string matches from the provided list.
+
+## Refinements
+
+Refinements add constraints on top of a validator. They are chainable:
+
+```ts
+string().url().min(1).max(255).optional()
+number().int().positive().min(0).max(100)
+```
+
+Each refinement returns a new validator with the additional constraint — the original
+validator is not mutated. This means you can reuse base validators:
+
+```ts
+const baseUrl = string().url()
+
+const serverUrl = baseUrl.describe("Server URL")
+const clientUrl = baseUrl.describe("Client URL").optional()
+```
+
+## Chainable Methods
+
+These methods are available on every validator:
+
+| Method | Description |
+|---|---|
+| `.optional()` | Marks the variable as optional (value is `undefined` when missing) |
+| `.default(value)` | Sets a default value when the variable is missing |
+| `.describe(text)` | Attaches a human-readable description |
+| `.secret()` | Marks as secret (masked in CLI output and logs) |
+| `.validate(fn)` | Adds a custom validation function |
+
+## Schemas
+
+A schema is a plain object where keys are environment variable names and values are validators:
+
+```ts
+const schema = {
+  DATABASE_URL: string().url(),
+  PORT: number().port().default(3000),
+}
+```
+
+The schema definition is a `Record<string, Validator<unknown>>`. TypeScript infers the
+output type automatically.
+
+## defineEnv()
+
+`defineEnv()` is the main entry point. It takes a schema and optional source, then:
+
+1. Walks each key in the schema
+2. Reads the value from the environment source
+3. Runs the validator
+4. Collects all errors (doesn't throw on first error)
+5. Returns a deeply frozen, typed object — or throws `CtroEnvError` with all errors
+
+```ts
+const env = defineEnv(schema, {
+  source: { DATABASE_URL: "postgresql://...", PORT: "4000" },
+  prefix: "MY_APP_",  // prefix for key lookup
+})
+```
+
+## Environment Sources
+
+An environment source is any object with a `get(key: string) => string | undefined` method.
+
+| Source | Package | Description |
+|---|---|---|
+| Default (`detectSource`) | `@ctroenv/core` | Auto-detects `process.env` or `import.meta.env` |
+| `loadEnv()` | `@ctroenv/node` | Reads from `.env` files |
+| `nodeSource()` | `@ctroenv/node` | Wraps `process.env` explicitly |
+| `viteSource()` | `@ctroenv/vite` | Reads from `import.meta.env` |
+| Plain object | any | Pass `{ KEY: "value" }` directly |
+
+## Error Handling
+
+When validation fails, `defineEnv()` throws a `CtroEnvError`:
+
+```ts
+class CtroEnvError extends Error {
+  readonly errors: readonly ValidationError[]
+}
+```
+
+Each `ValidationError` has:
+
+| Field | Type | Description |
+|---|---|---|
+| `key` | `string` | The environment variable name |
+| `message` | `string` | Human-readable error message |
+| `code` | `ErrorCode` | Machine-readable error code |
+| `value` | `unknown` | The original (invalid) value |
+| `suggestion` | `string \| undefined` | Suggested fix |
+
+### Error Codes
+
+| Code | Meaning |
+|---|---|
+| `missing_required` | Variable is required but not set |
+| `type_mismatch` | Value has the wrong type |
+| `invalid_value` | Value doesn't pass a refinement |
+| `coercion_failed` | Could not coerce to the target type |
+| `validation_failed` | Custom `.validate()` function failed |

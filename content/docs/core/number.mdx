@@ -1,0 +1,131 @@
+# number()
+
+Creates a validator that accepts number values. Also accepts numeric strings (coerces to number).
+
+## Signature
+
+```ts
+function number(): NumberValidator
+```
+
+## Accepted Values
+
+| Input | Result | Notes |
+|---|---|---|
+| `42` | ✅ `42` | Actual number |
+| `"42"` | ✅ `42` | Numeric string, coerced |
+| `"3.14"` | ✅ `3.14` | Float string, coerced |
+| `""` | ❌ Type error | Empty string |
+| `"abc"` | ❌ Type error | Non-numeric |
+| `NaN` | ❌ Invalid | Non-finite |
+| `Infinity` | ❌ Invalid | Non-finite |
+| `true` | ❌ Type error | Boolean |
+| `null` | ❌ Type error | Not a number |
+
+## Refinements
+
+### .int()
+
+Requires the number to be an integer:
+
+```ts
+const env = defineEnv({
+  MAX_CONNECTIONS: number().int(),
+})
+// ✅ 10
+// ❌ 10.5
+// ❌ "10.5"
+```
+
+### .positive()
+
+Requires the number to be greater than zero:
+
+```ts
+const env = defineEnv({
+  RATE_LIMIT: number().positive(),
+})
+// ✅ 1
+// ✅ 100
+// ❌ 0
+// ❌ -5
+```
+
+### .port()
+
+Requires the number to be a valid port (1-65535, integer):
+
+```ts
+const env = defineEnv({
+  PORT: number().port(),
+})
+// ✅ 3000
+// ✅ 65535
+// ❌ 0
+// ❌ 70000
+// ❌ 3000.5
+```
+
+### .min(value)
+
+Requires the number to be greater than or equal to `value`:
+
+```ts
+const env = defineEnv({
+  WORKERS: number().min(1),
+})
+// ✅ 1
+// ✅ 4
+// ❌ 0
+```
+
+### .max(value)
+
+Requires the number to be less than or equal to `value`:
+
+```ts
+const env = defineEnv({
+  TIMEOUT: number().max(30000),
+})
+// ✅ 5000
+// ✅ 30000
+// ❌ 35000
+```
+
+### Chaining
+
+```ts
+number().int().positive().min(1).max(100).default(50)
+number().port()
+number().min(0).optional()
+```
+
+## Examples
+
+### Basic number
+
+```ts
+const env = defineEnv({
+  MAX_RETRIES: number().int().min(0).max(10).default(3),
+})
+// env.MAX_RETRIES: number (default: 3)
+```
+
+### Number with coercion
+
+```ts
+const env = defineEnv({
+  PORT: number().port(),
+})
+// With process.env.PORT = "4000"
+// env.PORT → 4000 (coerced from "4000")
+```
+
+### Optional number
+
+```ts
+const env = defineEnv({
+  CACHE_TTL: number().positive().optional(),
+})
+// env.CACHE_TTL: number | undefined
+```

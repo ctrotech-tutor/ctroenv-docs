@@ -1,0 +1,57 @@
+# ctroenv init
+
+Scaffold a new CtroEnv project with schema and configuration files.
+
+## Usage
+
+```bash
+ctroenv init [directory]
+```
+
+## Examples
+
+### Initialize in current directory
+
+```bash
+ctroenv init
+```
+
+Creates:
+- `env.ts` — Example schema file
+- `ctroenv.config.ts` — CLI configuration
+- `.env.example` — Generated example env file
+
+### Initialize in a specific directory
+
+```bash
+ctroenv init my-project
+cd my-project
+```
+
+## Generated Files
+
+### env.ts
+
+```ts
+import { defineEnv, string, number, pick } from "@ctroenv/core"
+
+export const env = defineEnv({
+  NODE_ENV: pick(["development", "production"]).default("development"),
+  PORT: number().port().default(3000),
+  DATABASE_URL: string().url().describe("Primary database connection"),
+})
+```
+
+### ctroenv.config.ts
+
+```ts
+import { defineConfig } from "@ctroenv/cli"
+
+export default defineConfig({
+  schema: "./env.ts",
+  output: {
+    example: ".env.example",
+    docs: "ENV.md",
+  },
+})
+```

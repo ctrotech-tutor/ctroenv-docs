@@ -1,0 +1,97 @@
+# Vite Adapter
+
+The `@ctroenv/vite` package provides a Vite plugin that validates environment variables
+at build time.
+
+## Installation
+
+```bash
+npm install @ctroenv/vite
+```
+
+## Plugin
+
+### ctroenvPlugin()
+
+```ts
+function ctroenvPlugin(opts: CtroEnvPluginOptions): Plugin
+```
+
+### Options
+
+```ts
+interface CtroEnvPluginOptions {
+  schema: string | SchemaDefinition
+  failOnError?: boolean
+}
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `schema` | `string \| SchemaDefinition` | required | Schema file path or inline definition |
+| `failOnError` | `boolean` | `true` | Whether to fail the build on errors |
+
+### Usage
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite"
+import { ctroenvPlugin } from "@ctroenv/vite"
+
+export default defineConfig({
+  plugins: [
+    ctroenvPlugin({
+      schema: "./src/env.ts",
+      failOnError: true,
+    }),
+  ],
+})
+```
+
+The plugin validates environment variables at `buildStart`, before the actual build
+begins. This catches missing or invalid variables early.
+
+### Inline Schema
+
+You can pass the schema inline instead of a file path:
+
+```ts
+ctroenvPlugin({
+  schema: {
+    VITE_API_URL: string().url(),
+    VITE_APP_NAME: string().min(1),
+  },
+})
+```
+
+### Warning Mode
+
+Set `failOnError: false` to warn instead of failing the build:
+
+```ts
+ctroenvPlugin({
+  schema: "./src/env.ts",
+  failOnError: false, // Warns but doesn't fail
+})
+```
+
+## viteSource()
+
+Creates an `EnvSource` that first reads from Vite's `import.meta.env`, then falls back
+to `process.env`:
+
+```ts
+function viteSource()
+```
+
+```ts
+import { defineEnv } from "@ctroenv/core"
+import { viteSource } from "@ctroenv/vite"
+
+const env = defineEnv(schema, {
+  source: viteSource(),
+})
+```
+
+This is used internally by the plugin but can also be used directly in your application
+code when you need to validate against Vite's environment.

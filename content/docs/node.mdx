@@ -1,0 +1,103 @@
+# Node Adapter
+
+The `@ctroenv/node` package provides `.env` file loading and `process.env` access for
+Node.js applications.
+
+## Installation
+
+```bash
+npm install @ctroenv/node
+```
+
+## loadEnv()
+
+Loads environment variables from `.env` files in a priority chain.
+
+```ts
+function loadEnv(opts?: LoadEnvOptions): EnvSource
+```
+
+### Options
+
+```ts
+interface LoadEnvOptions {
+  path?: string
+  encoding?: BufferEncoding
+  override?: boolean
+  system?: boolean
+}
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `path` | `string` | `process.cwd()` | Root directory to search for .env files |
+| `encoding` | `BufferEncoding` | `"utf-8"` | File encoding |
+| `override` | `boolean` | `false` | If false, `process.env` takes priority |
+| `system` | `boolean` | `false` | Fall back to `process.env` when key not in files |
+
+### File Priority Chain
+
+Files are loaded in order, with later files overriding earlier ones:
+
+1. `.env`
+2. `.env.{NODE_ENV}` (e.g., `.env.development`)
+3. `.env.local`
+
+### Usage
+
+```ts
+import { defineEnv } from "@ctroenv/core"
+import { loadEnv } from "@ctroenv/node"
+
+const env = defineEnv(schema, {
+  source: loadEnv(),
+})
+```
+
+### Override Behavior
+
+By default, `process.env` takes priority over file values:
+
+```ts
+// process.env.DATABASE_URL always wins
+const source = loadEnv()
+
+// .env files override process.env
+const source = loadEnv({ override: true })
+```
+
+## nodeSource()
+
+A simpler alternative that only wraps `process.env`:
+
+```ts
+function nodeSource(): EnvSource
+```
+
+```ts
+import { defineEnv } from "@ctroenv/core"
+import { nodeSource } from "@ctroenv/node"
+
+const env = defineEnv(schema, {
+  source: nodeSource(),
+})
+```
+
+This is equivalent to not passing a source at all (the default auto-detection uses
+`process.env` in Node.js), but is useful for explicit readability.
+
+## EnvSource Type
+
+The `EnvSource` type is re-exported for convenience:
+
+```ts
+import type { EnvSource } from "@ctroenv/node"
+
+function customSource(): EnvSource {
+  return {
+    get(key: string): string | undefined {
+      return process.env[key] ?? myCustomStore[key]
+    },
+  }
+}
+```

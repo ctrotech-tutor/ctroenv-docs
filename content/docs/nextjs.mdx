@@ -1,0 +1,113 @@
+# Next.js Adapter
+
+The `@ctroenv/nextjs` package provides Next.js integration with client/server environment
+variable splitting and build-time validation.
+
+## Installation
+
+```bash
+npm install @ctroenv/nextjs
+```
+
+## Schema Definition
+
+Next.js requires splitting environment variables into **server** and **client** schemas:
+
+```ts
+import { defineEnv, string, number, type NextSchemaDefinition } from "@ctroenv/nextjs"
+
+const schema = {
+  server: {
+    DATABASE_URL: string().url(),
+    JWT_SECRET: string().secret(),
+    REDIS_URL: string().url().optional(),
+  },
+  client: {
+    NEXT_PUBLIC_API_URL: string().url(),
+    NEXT_PUBLIC_APP_NAME: string().min(1),
+  },
+} satisfies NextSchemaDefinition
+```
+
+- **Server variables**: Only accessible on the server. Accessing from the browser throws
+  an error.
+- **Client variables**: Must be prefixed with `NEXT_PUBLIC_`. Accessible everywhere.
+
+## defineEnv()
+
+Returns a proxied environment object that enforces server/client boundaries:
+
+```ts
+import { defineEnv } from "@ctroenv/nextjs"
+
+const env = defineEnv(schema)
+
+// Server Components (server-side):
+env.DATABASE_URL  // ✅ string
+env.JWT_SECRET    // ✅ string
+env.NEXT_PUBLIC_API_URL  // ✅ string
+
+// Client Components (browser):
+env.NEXT_PUBLIC_API_URL      // ✅ string
+env.NEXT_PUBLIC_APP_NAME     // ✅ string
+env.DATABASE_URL             // ❌ Throws: "Server-only environment variable..."
+```
+
+### Server-side
+
+On the server, both `server` and `client` schemas are validated against `process.env`.
+
+### Client-side
+
+In the browser, only the `client` schema is resolved. Server variables return empty
+values, and accessing them throws a descriptive error:
+
+```txt
+Server-only environment variable "DATABASE_URL" is not accessible on the client.
+Prefix it with NEXT_PUBLIC_ to expose it to the client bundle.
+```
+
+## withCtroEnv()
+
+Wraps your Next.js config to validate environment variables during the build:
+
+```ts
+// next.config.ts
+import { withCtroEnv } from "@ctroenv/nextjs"
+import type { NextConfig } from "next"
+
+const nextConfig: NextConfig = {
+  // your existing next config
+}
+
+export default withCtroEnv(schema, nextConfig)
+```
+
+The wrapper adds a `webpack` hook that validates variables during server-side builds.
+If validation fails, errors are logged and the build exits with code 1.
+
+Composes with any existing `webpack` function in your config.
+
+## Type Inference
+
+The `InferredNextEnv` type automatically infers the shape from your schema:
+
+```ts
+type InferredNextEnv<T extends NextSchemaDefinition> = {
+  [K in keyof T["server"]]: T["server"][K] extends Validator<infer V> ? V : never
+} & {
+  [K in keyof T["client"]]: T["client"][K] extends Validator<infer V> ? V : never
+}
+
+// Full autocomplete for env.DATABASE_URL, env.NEXT_PUBLIC_API_URL, etc.
+```
+
+## Best Practices
+
+1. **Always validate server-side**: Use `withCtroEnv()` in `next.config.ts` to catch
+   issues during build.
+2. **Prefix client vars**: All client-facing variables must start with `NEXT_PUBLIC_`.
+3. **Don't expose secrets**: Server-only variables are completely inaccessible from
+   the browser — no risk of accidental exposure.
+4. **Type safety**: The proxied object provides full TypeScript autocomplete for both
+   server and client variables.

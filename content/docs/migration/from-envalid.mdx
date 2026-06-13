@@ -1,0 +1,98 @@
+# Migration from envalid
+
+If you're using envalid, migrating to CtroEnv gives you TypeScript-native inference and
+a modern chainable API.
+
+## Key Differences
+
+| Feature | envalid | CtroEnv |
+|---|---|---|
+| API | Object-based (`str()`, `num()`) | Chainable methods (`string().url()`) |
+| TypeScript inference | Manual type creation | Automatic inference |
+| Error messages | Basic | Rich, grouped, with suggestions |
+| CLI | None | Full CLI tooling |
+| Framework adapters | None | Node, Vite, Next.js |
+| Secret masking | Not supported | `.secret()` method |
+
+## Step-by-Step Migration
+
+### 1. Install CtroEnv
+
+```bash
+npm uninstall envalid
+npm install @ctroenv/core
+```
+
+### 2. Replace imports and schema
+
+```ts
+// Before (envalid)
+import { cleanEnv, str, num, url, makeValidator } from "envalid"
+
+const env = cleanEnv(process.env, {
+  DATABASE_URL: url(),
+  PORT: num({ default: 3000 }),
+  NODE_ENV: str({ choices: ["dev", "prod"] }),
+})
+
+// After (CtroEnv)
+import { defineEnv, string, number, pick } from "@ctroenv/core"
+
+const env = defineEnv({
+  DATABASE_URL: string().url(),
+  PORT: number().port().default(3000),
+  NODE_ENV: pick(["dev", "prod"]),
+})
+```
+
+### 3. Update custom validators
+
+```ts
+// Before (envalid — makeValidator)
+const hostname = makeValidator((input) => {
+  if (!/^[a-z0-9.-]+$/.test(input)) {
+    throw new Error("Invalid hostname")
+  }
+  return input
+})
+
+// After (CtroEnv — .validate())
+const hostnameValidator = string().validate((value) => {
+  if (!/^[a-z0-9.-]+$/.test(value)) {
+    return "Invalid hostname"
+  }
+})
+```
+
+## Key Mapping
+
+| envalid | CtroEnv |
+|---|---|
+| `str()` | `string()` |
+| `num()` | `number()` |
+| `bool()` | `boolean()` |
+| `url()` | `string().url()` |
+| `email()` | `string().email()` |
+| `json()` | Custom `.validate()` |
+| `makeValidator()` | `.validate()` |
+| `{ default: v }` | `.default(v)` |
+| `{ choices: [...] }` | `pick([...])` |
+| `cleanEnv()` | `defineEnv()` |
+
+## What's Different
+
+### Type Inference
+
+envalid requires separate type definitions. CtroEnv infers types automatically:
+
+```ts
+// envalid: must manually define types
+type Env = {
+  PORT: number
+  DATABASE_URL: string
+}
+
+// CtroEnv: types are inferred automatically
+const env = defineEnv({ ... })
+// typeof env.PORT → number
+```

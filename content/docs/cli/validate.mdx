@@ -1,0 +1,79 @@
+# ctroenv validate
+
+Validate environment variables against your schema.
+
+## Usage
+
+```bash
+ctroenv validate [options]
+```
+
+## Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `--source` | `string` | `process.env` | Path to a `.env` file |
+| `--strict` | `boolean` | `false` | Fail on warnings |
+| `--watch` | `boolean` | `false` | Watch for file changes |
+| `--json` | `boolean` | `false` | Output as JSON |
+| `--schema` | `string` | `ctroenv.config.ts` | Schema file path |
+
+## Examples
+
+### Basic validation
+
+```bash
+ctroenv validate
+```
+
+Validates against `process.env` using the schema from `ctroenv.config.ts`.
+
+### With .env file
+
+```bash
+ctroenv validate --source .env.local
+```
+
+### Watch mode
+
+```bash
+ctroenv validate --watch
+```
+
+Re-validates when your schema or env files change. Useful during development.
+
+### JSON output
+
+```bash
+ctroenv validate --json
+```
+
+Outputs validation results as JSON for programmatic consumption:
+
+```json
+{
+  "valid": false,
+  "source": ".env",
+  "total": 5,
+  "errors": 2,
+  "variables": [
+    {
+      "key": "DATABASE_URL",
+      "type": "string",
+      "value": "postgresql://...",
+      "required": true,
+      "description": "Primary database connection",
+      "isSecret": false,
+      "hasDefault": false
+    }
+  ]
+}
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|---|---|
+| `0` | All variables valid |
+| `1` | Validation errors found |
+| `2` | Configuration error |

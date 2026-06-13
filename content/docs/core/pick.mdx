@@ -1,0 +1,103 @@
+# pick()
+
+Creates a validator that accepts only specific string values (like an enum).
+
+## Signature
+
+```ts
+function pick<T extends readonly string[]>(values: T): PickValidator<T>
+```
+
+## Parameters
+
+| Param | Type | Description |
+|---|---|---|
+| `values` | `readonly string[]` | Array of allowed string values |
+
+## Accepted Values
+
+Only exact string matches from the provided list:
+
+```ts
+const env = defineEnv({
+  NODE_ENV: pick(["development", "staging", "production"]),
+})
+// ✅ "development"
+// ✅ "staging"
+// ✅ "production"
+// ❌ "dev" (not in the list)
+// ❌ "Development" (case-sensitive)
+// ❌ 42 (wrong type)
+```
+
+## Fuzzy Suggestions
+
+When the input doesn't match any value, `pick()` compares case-insensitively and by prefix
+to suggest the closest match:
+
+```ts
+const env = defineEnv({
+  LOG_LEVEL: pick(["debug", "info", "warn", "error"]),
+})
+// With LOG_LEVEL="inf"
+// Error: Expected one of 'debug', 'info', 'warn', 'error', received "inf"
+// Suggestion: Did you mean 'info'?
+```
+
+## Type Inference
+
+The TypeScript type is inferred as a union of the supplied literals:
+
+```ts
+const env = defineEnv({
+  NODE_ENV: pick(["dev", "staging", "prod"]),
+})
+// env.NODE_ENV: "dev" | "staging" | "prod"
+```
+
+This enables exhaustive checking:
+
+```ts
+switch (env.NODE_ENV) {
+  case "dev": break
+  case "staging": break
+  case "prod": break
+  // TypeScript error if a case is missing
+}
+```
+
+## Examples
+
+### Environment mode
+
+```ts
+const env = defineEnv({
+  NODE_ENV: pick(["development", "production"]).default("development"),
+})
+// env.NODE_ENV: "development" | "production"
+```
+
+### Log level
+
+```ts
+const env = defineEnv({
+  LOG_LEVEL: pick(["debug", "info", "warn", "error"]).default("info"),
+})
+```
+
+### Deployment region
+
+```ts
+const env = defineEnv({
+  REGION: pick(["us-east-1", "us-west-2", "eu-west-1"]),
+})
+```
+
+### With optional
+
+```ts
+const env = defineEnv({
+  CACHE_STRATEGY: pick(["memory", "redis", "memcached"]).optional(),
+})
+// env.CACHE_STRATEGY: "memory" | "redis" | "memcached" | undefined
+```

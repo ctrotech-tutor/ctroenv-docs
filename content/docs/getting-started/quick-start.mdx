@@ -1,0 +1,123 @@
+# Quick Start
+
+Let's build a schema for a typical web application from scratch.
+
+## 1. Create a Schema File
+
+Create `env.ts` in your project:
+
+```ts
+import { defineEnv, string, number, boolean, pick } from "@ctroenv/core"
+
+export const env = defineEnv({
+  // Required: database connection
+  DATABASE_URL: string().url().describe("PostgreSQL connection string"),
+
+  // Optional: server port (defaults to 3000)
+  PORT: number().port().default(3000),
+
+  // Required: environment mode
+  NODE_ENV: pick(["development", "staging", "production"]),
+
+  // Optional: enable debugging
+  DEBUG: boolean().optional(),
+
+  // Required: secret key (masked in logs)
+  JWT_SECRET: string().secret().min(32),
+
+  // Optional: Redis URL
+  REDIS_URL: string().url().optional(),
+})
+```
+
+## 2. Use It in Your Code
+
+```ts
+import { env } from "./env"
+
+const app = express()
+
+app.listen(env.PORT, () => {
+  console.log(`Server running on port ${env.PORT}`)
+  console.log(`Environment: ${env.NODE_ENV}`)
+})
+
+// env.DATABASE_URL is typed as `string`
+// env.PORT is typed as `number`
+// env.NODE_ENV is typed as "development" | "staging" | "production"
+// env.DEBUG is typed as `boolean | undefined`
+```
+
+## 3. Run Your Application
+
+```bash
+# Set required variables
+export DATABASE_URL="postgresql://localhost:5432/myapp"
+export NODE_ENV="development"
+export JWT_SECRET="your-secret-key-that-is-at-least-32-chars"
+
+# Run your app
+npx tsx app.ts
+```
+
+## 4. Handle Errors
+
+When variables are missing or invalid, `defineEnv()` throws an error
+with all validation failures:
+
+```ts
+import { CtroEnvError } from "@ctroenv/core"
+import { env } from "./env"
+// ❌ Throws CtroEnvError if DATABASE_URL is missing or not a URL
+```
+
+You can catch it to show friendly messages:
+
+```ts
+try {
+  const env = defineEnv({ ... })
+} catch (e) {
+  if (e instanceof CtroEnvError) {
+    console.error(formatErrors(e.errors))
+    process.exit(1)
+  }
+  throw e
+}
+```
+
+## 5. Provide Environment Variables
+
+### Using process.env (default)
+
+By default, `defineEnv()` reads from `process.env`. Set variables before running:
+
+```bash
+export DATABASE_URL="postgresql://..."
+node app.js
+```
+
+### Using a .env file
+
+For local development, use the Node adapter:
+
+```ts
+import { defineEnv } from "@ctroenv/core"
+import { loadEnv } from "@ctroenv/node"
+
+const env = defineEnv(mySchema, { source: loadEnv() })
+```
+
+`loadEnv()` reads `.env`, `.env.development`, and `.env.local` files in order.
+
+### Using an object (testing)
+
+Pass a plain object for tests:
+
+```ts
+const env = defineEnv(mySchema, {
+  source: {
+    DATABASE_URL: "postgresql://test:test@localhost:5432/test",
+    NODE_ENV: "development",
+  },
+})
+```

@@ -1,0 +1,116 @@
+# Migration from t3-env
+
+CtroEnv is heavily inspired by t3-env and shares the same chainable validator pattern.
+Migration is straightforward.
+
+## Key Differences
+
+| Feature | t3-env | CtroEnv |
+|---|---|---|
+| Runtime deps | `zod` (required) | Zero dependencies |
+| Framework adapters | Built-in | Separate packages (`@ctroenv/node`, `@ctroenv/vite`, `@ctroenv/nextjs`) |
+| CLI | None | Full CLI (`validate`, `generate`, `check`, `docs`, `init`) |
+| Error messages | Basic | Rich, grouped, with suggestions |
+| Secret masking | Not supported | `.secret()` method |
+| Type inference | Via `zod` inference | Native inference |
+| Bundle size | ~50KB+ (zod included) | under 5KB gzipped |
+| Validation | Throws on first error | Collects all errors |
+
+## Step-by-Step Migration
+
+### 1. Install CtroEnv
+
+```bash
+npm uninstall @t3-oss/env-core
+npm install @ctroenv/core
+```
+
+### 2. Replace imports
+
+```ts
+// Before (t3-env)
+import { createEnv } from "@t3-oss/env-core"
+import { z } from "zod"
+
+// After (CtroEnv)
+import { defineEnv, string, number, pick } from "@ctroenv/core"
+```
+
+### 3. Replace schema definitions
+
+```ts
+// Before (t3-env)
+export const env = createEnv({
+  server: {
+    DATABASE_URL: z.string().url(),
+    PORT: z.coerce.number().int().positive(),
+    NODE_ENV: z.enum(["dev", "prod"]),
+  },
+  client: {
+    NEXT_PUBLIC_API_URL: z.string().url(),
+  },
+  clientPrefix: "NEXT_PUBLIC_",
+  runtimeEnv: process.env,
+})
+
+// After (CtroEnv — standalone)
+const env = defineEnv({
+  DATABASE_URL: string().url(),
+  PORT: number().int().positive(),
+  NODE_ENV: pick(["dev", "prod"]),
+})
+
+// After (CtroEnv — Next.js)
+import { defineEnv } from "@ctroenv/nextjs"
+
+const env = defineEnv({
+  server: {
+    DATABASE_URL: string().url(),
+    PORT: number().int().positive(),
+    NODE_ENV: pick(["dev", "prod"]),
+  },
+  client: {
+    NEXT_PUBLIC_API_URL: string().url(),
+  },
+})
+```
+
+### 4. Update adapters
+
+```ts
+// Before
+import { createEnv } from "@t3-oss/env-core"
+import { z } from "zod"
+
+// After
+import { defineEnv } from "@ctroenv/core"
+import { loadEnv } from "@ctroenv/node"
+
+const env = defineEnv(schema, {
+  source: loadEnv(),
+})
+```
+
+## What's Different
+
+### Error Collection
+
+t3-env throws on the first error. CtroEnv collects ALL errors:
+
+```ts
+// t3-env: throws on first missing variable (you fix, re-run, repeat)
+// CtroEnv: throws with ALL errors at once (fix everything in one pass)
+```
+
+### No `.coerce()`
+
+t3-env uses `z.coerce.number()` for string coercion. CtroEnv's `number()` handles
+coercion automatically:
+
+```ts
+// t3-env
+z.coerce.number()  // Requires explicit coercion
+
+// CtroEnv
+number()  // Auto-coerces numeric strings
+```

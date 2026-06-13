@@ -1,0 +1,76 @@
+# boolean()
+
+Creates a validator that accepts boolean values. Supports string and numeric coercion.
+
+## Signature
+
+```ts
+function boolean(): BooleanValidator
+```
+
+## Accepted Values
+
+| Input | Result | Notes |
+|---|---|---|
+| `true` | ✅ `true` | Actual boolean |
+| `false` | ✅ `false` | Actual boolean |
+| `"true"` | ✅ `true` | Case-insensitive, trimmed |
+| `"false"` | ✅ `false` | Case-insensitive, trimmed |
+| `"TRUE"` | ✅ `true` | Case-insensitive |
+| `"1"` | ✅ `true` | String "1" |
+| `"0"` | ✅ `false` | String "0" |
+| `1` | ✅ `true` | Number 1 |
+| `0` | ✅ `false` | Number 0 |
+| `"yes"` | ❌ Type error | Not a recognized boolean string |
+| `2` | ❌ Type error | Only 1 and 0 are accepted |
+| `null` | ❌ Type error | |
+
+## Refinements
+
+`boolean()` has no type-specific refinements. It only has the
+[chainable methods](/docs/core/chainable) (`.optional()`, `.default()`, `.describe()`,
+`.secret()`, `.validate()`).
+
+## Examples
+
+### Basic boolean
+
+```ts
+const env = defineEnv({
+  DEBUG: boolean(),
+})
+// With process.env.DEBUG = "true"
+// env.DEBUG → true
+```
+
+### Optional boolean
+
+```ts
+const env = defineEnv({
+  FEATURE_X_ENABLED: boolean().optional(),
+})
+// env.FEATURE_X_ENABLED: boolean | undefined
+```
+
+### Boolean with default
+
+```ts
+const env = defineEnv({
+  ENABLE_LOGGING: boolean().default(true),
+})
+// env.ENABLE_LOGGING: boolean (defaults to true if not set)
+```
+
+### Common patterns
+
+```ts
+const env = defineEnv({
+  // Feature flags
+  ENABLE_NEW_DASHBOARD: boolean().default(false),
+  SHOW_EXPERIMENTAL: boolean().optional(),
+
+  // Logging controls
+  DEBUG: boolean().default(false).describe("Enable debug logging"),
+  VERBOSE: boolean().default(false),
+})
+```

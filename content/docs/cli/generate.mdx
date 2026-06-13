@@ -1,0 +1,80 @@
+# ctroenv generate
+
+Generate a `.env.example` file from your schema.
+
+## Usage
+
+```bash
+ctroenv generate [options]
+```
+
+## Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `--output` | `string` | `.env.example` | Output file path |
+| `--no-comments` | `boolean` | `false` | Omit comments from output |
+
+## Output Format
+
+The generated file includes:
+
+- **Comments** describing each variable (from `.describe()` in your schema)
+- **Type and required/optional** annotations
+- **Default values** when applicable
+- **Secret variables** are left empty (value not written)
+
+```bash
+# CtroEnv — Environment Variables
+# Generated from schema. Edit the schema, not this file.
+
+# Primary database connection string
+# Required: yes
+# Type: url
+DATABASE_URL=
+
+# Server port
+# Required: no
+# Type: port
+# Default: 3000
+PORT=3000
+
+# JWT signing secret
+# Required: yes
+# Type: string
+# (secret — do not commit this value)
+# JWT_SECRET=
+
+# Enable debug logging
+# Required: no
+# Type: boolean
+# Default: false
+DEBUG=false
+```
+
+## Examples
+
+### Basic generation
+
+```bash
+ctroenv generate
+```
+
+### Custom output path
+
+```bash
+ctroenv generate --output .env.sample
+```
+
+### Minimal output (no comments)
+
+```bash
+ctroenv generate --no-comments
+```
+
+```bash
+DATABASE_URL=
+PORT=3000
+# JWT_SECRET=
+DEBUG=false
+```

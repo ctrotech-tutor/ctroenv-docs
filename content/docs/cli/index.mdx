@@ -1,0 +1,74 @@
+# CLI Overview
+
+CtroEnv CLI provides command-line tools for validating, generating, checking, and documenting
+environment variables.
+
+## Installation
+
+```bash
+npm install @ctroenv/cli
+```
+
+Or use directly with npx:
+
+```bash
+npx @ctroenv/cli validate
+```
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `validate` | Validate environment variables against a schema |
+| `generate` | Generate `.env.example` from a schema |
+| `check` | CI-friendly validation (exit codes, JSON output) |
+| `docs` | Generate documentation from a schema |
+| `init` | Scaffold a new CtroEnv project |
+
+## Configuration
+
+Create a `ctroenv.config.ts` file in your project root:
+
+```ts
+import { defineConfig } from "@ctroenv/cli"
+
+export default defineConfig({
+  schema: "./src/env.ts",
+  sources: {
+    env: ".env",
+  },
+  output: {
+    example: ".env.example",
+    docs: "ENV.md",
+  },
+  secrets: {
+    mask: ["JWT_SECRET", "API_KEY"],
+    maskWith: "••••••••",
+  },
+})
+```
+
+## Usage
+
+```bash
+# Validate current environment
+ctroenv validate
+
+# Generate .env.example
+ctroenv generate
+
+# CI-friendly check
+ctroenv check
+
+# Generate documentation
+ctroenv docs --output ENV.md
+
+# Initialize a new project
+ctroenv init
+```
+
+Pass the `--help` flag to any command for detailed options:
+
+```bash
+ctroenv validate --help
+```

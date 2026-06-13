@@ -1,0 +1,47 @@
+# ctroenv check
+
+CI-friendly validation command. Designed for continuous integration pipelines.
+
+## Usage
+
+```bash
+ctroenv check [options]
+```
+
+## Options
+
+Same as [validate](/docs/cli/validate).
+
+## CI Integration
+
+```yaml
+# .github/workflows/env-check.yml
+name: Environment Check
+on: [pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - run: npx ctroenv check
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|---|---|
+| `0` | All variables valid |
+| `1` | Validation errors found |
+| `2` | Configuration error |
+
+Combine with `.env.example` in CI:
+
+```bash
+# Validate against the example file (all required vars present)
+ctroenv check --source .env.example
+
+# Strict mode: also check optional variables have correct types
+ctroenv check --source .env.example --strict
+```

@@ -1,0 +1,97 @@
+# Migration from dotenv
+
+If you're using `dotenv` with raw `process.env` access, CtroEnv adds validation,
+type safety, and structured error handling.
+
+## Key Differences
+
+| Feature | dotenv | CtroEnv |
+|---|---|---|
+| Validation | None | Full validation with type coercion |
+| TypeScript | `string \| undefined` | Exact inferred types |
+| Error messages | None | Rich, grouped, with suggestions |
+| Default values | Manual | Built-in `.default()` |
+| Secret handling | None | `.secret()` masking |
+| `.env` loading | Manual | `@ctroenv/node` adapter |
+
+## Step-by-Step Migration
+
+### 1. Install CtroEnv
+
+```bash
+npm install @ctroenv/core @ctroenv/node
+```
+
+### 2. Replace dotenv usage
+
+```ts
+// Before (dotenv)
+import "dotenv/config"
+
+const dbUrl = process.env.DATABASE_URL
+if (!dbUrl) {
+  throw new Error("DATABASE_URL is required")
+}
+const port = Number(process.env.PORT) || 3000
+
+// After (CtroEnv)
+import { defineEnv, string, number } from "@ctroenv/core"
+import { loadEnv } from "@ctroenv/node"
+
+const env = defineEnv(
+  {
+    DATABASE_URL: string().url(),
+    PORT: number().port().default(3000),
+  },
+  { source: loadEnv() },
+)
+```
+
+### 3. Remove manual validation
+
+```ts
+// Before: manual checks everywhere
+function getConfig() {
+  const nodeEnv = process.env.NODE_ENV
+  if (!["dev", "prod"].includes(nodeEnv ?? "")) {
+    throw new Error("Invalid NODE_ENV")
+  }
+  return { nodeEnv }
+}
+
+// After: single schema definition
+const env = defineEnv({
+  NODE_ENV: pick(["dev", "prod"]),
+})
+```
+
+## What You Gain
+
+### Type Safety
+
+```ts
+// Before: process.env.PORT is string | undefined
+const port = process.env.PORT  // string | undefined
+
+// After: env.PORT is number (or throws at init)
+const port = env.PORT  // number
+```
+
+### Early Failure
+
+```ts
+// Before: errors surface when the value is first accessed
+function handleRequest() {
+  const db = process.env.DATABASE_URL  // May fail deep in request handling
+}
+
+// After: errors surface at startup
+const env = defineEnv({ ... })  // Fails immediately if anything is wrong
+```
+
+### Single Source of Truth
+
+```ts
+// Before: validation scattered across the codebase
+// After: all env vars defined and validated in one place
+```

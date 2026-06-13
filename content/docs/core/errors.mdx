@@ -1,0 +1,156 @@
+# Error Handling
+
+CtroEnv provides a structured error system with machine-readable codes and human-readable
+messages with suggestions.
+
+## CtroEnvError
+
+When one or more validations fail, `defineEnv()` throws a `CtroEnvError`:
+
+```ts
+class CtroEnvError extends Error {
+  readonly errors: readonly ValidationError[]
+}
+```
+
+The error message is automatically formatted using `formatErrors()`.
+
+## ValidationError
+
+Each individual field error is a `ValidationError` object:
+
+```ts
+class ValidationError {
+  readonly key: string
+  readonly message: string
+  readonly code: ErrorCode
+  readonly value: unknown | undefined
+  readonly suggestion: string | undefined
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `key` | `string` | The environment variable name |
+| `message` | `string` | Human-readable error description |
+| `code` | `ErrorCode` | Machine-readable error category |
+| `value` | `unknown` | The original value that failed validation |
+| `suggestion` | `string \| undefined` | A suggested fix (when available) |
+
+## Error Codes
+
+```ts
+const ErrorCode = {
+  MissingRequired: "missing_required",
+  TypeMismatch: "type_mismatch",
+  InvalidValue: "invalid_value",
+  ValidationFailed: "validation_failed",
+  CoercionFailed: "coercion_failed",
+} as const
+```
+
+### missing_required
+
+A required environment variable was not found in the source.
+
+```ts
+defineEnv({ DATABASE_URL: string().url() })
+// ✗ Missing required environment variable: DATABASE_URL
+//   → Add this variable to your .env file or set it in the environment.
+```
+
+### type_mismatch
+
+The value exists but has the wrong type (e.g., a string where a number is expected).
+
+```ts
+defineEnv({ PORT: number().port() })
+// With PORT="not-a-number"
+// ✗ Expected a number, received "not-a-number"
+//   → Ensure the value is a numeric string or number.
+```
+
+### invalid_value
+
+The value has the correct type but fails a refinement (e.g., not a valid URL).
+
+```ts
+defineEnv({ API_URL: string().url() })
+// With API_URL="not-a-url"
+// ✗ Invalid URL
+```
+
+### validation_failed
+
+A custom `.validate()` function returned an error message.
+
+```ts
+defineEnv({
+  API_KEY: string().validate((v) =>
+    v.startsWith("sk_") ? undefined : "Must start with 'sk_'",
+  ),
+})
+// With API_KEY="invalid"
+// ✗ Must start with 'sk_'
+```
+
+### coercion_failed
+
+The value could not be coerced to the target type. Used by `errCoerce()` in validators.
+
+## formatErrors()
+
+Produces a structured, colorized CLI output from an array of errors:
+
+```ts
+import { formatErrors } from "@ctroenv/core"
+
+try {
+  const env = defineEnv(schema)
+} catch (e) {
+  if (e instanceof CtroEnvError) {
+    process.stderr.write(formatErrors(e.errors))
+    // ● Missing required (2)
+    //   DATABASE_URL
+    //     → Add this variable to your .env file or set it in the environment.
+    //   JWT_SECRET
+    //     → Add this variable to your .env file or set it in the environment.
+    //
+    // ✗ Invalid (1)
+    //   PORT
+    //     → Expected a number, received "not-a-number"
+    //     → Ensure the value is a numeric string or number.
+  }
+}
+```
+
+The output is grouped by error category ("Missing required" vs "Invalid") and includes
+colorized ANSI output when the terminal supports it. Respects `NO_COLOR`, `CI`, and
+`TERM=dumb` environment variables.
+
+## Error Message Factory
+
+The internal error factory functions are exported for custom validators:
+
+```ts
+import { errMissing, errType, errInvalid, errCoerce, errWrap } from "@ctroenv/core"
+
+// Create a missing-required error
+errMissing("DATABASE_URL", {
+  description: "Primary database connection",
+}) // code: "missing_required"
+
+// Create a type mismatch error
+errType("PORT", "string", "a number", {
+  suggestion: "Ensure the value is a numeric string.",
+}) // code: "type_mismatch"
+
+// Create an invalid value error
+errInvalid("API_URL", "not-a-url", "Invalid URL format") // code: "invalid_value"
+
+// Create a coercion error
+errCoerce("COUNT", "abc", "number") // code: "coercion_failed"
+
+// Create an error with a custom code
+errWrap("KEY", value, "Custom error", ErrorCode.ValidationFailed)
+```

@@ -1,0 +1,82 @@
+# CLI Configuration
+
+Configure the CLI behavior with a `ctroenv.config.ts` file in your project root.
+
+## defineConfig()
+
+```ts
+import { defineConfig } from "@ctroenv/cli"
+
+export default defineConfig({
+  // ... configuration
+})
+```
+
+`defineConfig()` is a type-safe helper that provides autocomplete and type checking.
+At runtime it simply returns the config object.
+
+## Configuration Options
+
+```ts
+interface CliConfig {
+  schema?: string
+  sources?: Record<string, string>
+  output?: {
+    example?: string
+    docs?: string
+  }
+  secrets?: {
+    mask?: string[]
+    maskWith?: string
+  }
+}
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `schema` | `string` | `"./src/env.ts"` | Path to the schema file |
+| `sources.env` | `string` | `".env"` | Path to the .env file |
+| `output.example` | `string` | `".env.example"` | Output path for `generate` |
+| `output.docs` | `string` | `"ENV.md"` | Output path for `docs` command |
+| `secrets.mask` | `string[]` | `[]` | Keys to mask in output |
+| `secrets.maskWith` | `string` | `"••••••••"` | Mask string |
+
+## ResolvedConfig
+
+At runtime, defaults are applied to produce a `ResolvedConfig`:
+
+```ts
+interface ResolvedConfig {
+  schema: string
+  sources: Record<string, string>
+  output: {
+    example: string
+    docs: string
+  }
+  secrets: {
+    mask: string[]
+    maskWith: string
+  }
+}
+```
+
+## Example
+
+```ts
+import { defineConfig } from "@ctroenv/cli"
+
+export default defineConfig({
+  schema: "./src/env.ts",
+  sources: {
+    env: ".env",
+  },
+  output: {
+    example: ".env.example",
+    docs: "docs/environment-variables.md",
+  },
+  secrets: {
+    mask: ["JWT_SECRET", "API_KEY", "PASSWORD"],
+    maskWith: "••••••••",
+  },
+})
+```

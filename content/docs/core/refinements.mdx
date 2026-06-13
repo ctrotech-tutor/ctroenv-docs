@@ -1,0 +1,109 @@
+# Refinements
+
+Refinements are standalone functions that wrap an existing validator to add a constraint.
+They are the building blocks used internally by validator methods like `.url()` and `.min()`.
+
+## Independent Refinements
+
+These functions are exported from `@ctroenv/core` for cases where you want to apply a
+refinement to a custom validator.
+
+### url
+
+```ts
+function url(): <T extends string>(v: Validator<T>) => Validator<T>
+```
+
+Wraps a string validator to require a valid URL:
+
+```ts
+import { url, string } from "@ctroenv/core"
+
+const myUrlValidator = url()(string().min(1))
+```
+
+### email
+
+```ts
+function email(): <T extends string>(v: Validator<T>) => Validator<T>
+```
+
+Wraps a string validator to require a valid email format.
+
+### regex
+
+```ts
+function regex(pattern: RegExp, message?: string): <T extends string>(v: Validator<T>) => Validator<T>
+```
+
+Wraps a string validator to require a regex match.
+
+### min
+
+```ts
+function min<N extends number>(limit: N): {
+  <T extends string>(v: Validator<T>): Validator<T>
+  <T extends number>(v: Validator<T>): Validator<T>
+}
+```
+
+Wraps a string or number validator to require a minimum length/value.
+
+- For **strings**: checks `value.length >= limit`
+- For **numbers**: checks `value >= limit`
+
+### max
+
+```ts
+function max<N extends number>(limit: N): {
+  <T extends string>(v: Validator<T>): Validator<T>
+  <T extends number>(v: Validator<T>): Validator<T>
+}
+```
+
+Wraps a string or number validator to require a maximum length/value.
+
+- For **strings**: checks `value.length <= limit`
+- For **numbers**: checks `value <= limit`
+
+### port
+
+```ts
+function port(): <T extends number | string>(v: Validator<T>) => Validator<T>
+```
+
+Wraps a number or string validator to require a valid port (1-65535).
+
+### integer
+
+```ts
+function integer<T extends number>(): (v: Validator<T>) => Validator<T>
+```
+
+Wraps a number validator to require an integer value.
+
+## When to Use Refinements vs Methods
+
+In most cases, you should use the type-specific methods:
+
+```ts
+string().url()       // ✅ Preferred
+number().int()       // ✅ Preferred
+```
+
+Standalone refinements are useful when building custom validator factories or when you
+need to apply a refinement that isn't available as a method:
+
+```ts
+import { url, createValidator, applyChain } from "@ctroenv/core"
+
+const myUrlValidator = applyChain(
+  createValidator<string>(
+    (input, context) => { /* custom parsing */ },
+    { typeLabel: "url" },
+  ),
+)
+
+// Apply the URL refinement
+const validated = url()(myUrlValidator)
+```

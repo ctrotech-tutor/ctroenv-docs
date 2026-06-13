@@ -1,0 +1,129 @@
+# defineEnv()
+
+The core function that validates environment variables against a schema and returns a typed,
+frozen environment object.
+
+## Signature
+
+```ts
+function defineEnv<T extends SchemaDefinition>(
+  schema: T,
+  opts?: DefineEnvOptions,
+): Readonly<InferredEnv<T>>
+```
+
+## Parameters
+
+### schema
+
+A schema definition object where keys are environment variable names and values are validators:
+
+```ts
+const schema = {
+  DATABASE_URL: string().url(),
+  PORT: number().port().default(3000),
+}
+```
+
+### opts (optional)
+
+```ts
+interface DefineEnvOptions {
+  source?: EnvSource | Record<string, string | undefined>
+  prefix?: string
+}
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `source` | `EnvSource \| Record` | Auto-detected | The environment source to read from |
+| `prefix` | `string` | `undefined` | Prefix added to each key when looking up in the source |
+
+#### source
+
+Controls where environment variables are read from. If omitted, `detectSource()` auto-detects
+using `process.env` (Node.js) or `import.meta.env` (Vite).
+
+```ts
+// Auto-detect (process.env or import.meta.env)
+defineEnv(schema)
+
+// Explicit Node.js source
+defineEnv(schema, { source: nodeSource() })
+
+// From .env files
+defineEnv(schema, { source: loadEnv() })
+
+// Plain object (testing)
+defineEnv(schema, {
+  source: { DATABASE_URL: "postgresql://localhost:5432/db" },
+})
+```
+
+#### prefix
+
+When set, all key lookups are prefixed. For example, with `prefix: "MY_APP_"`,
+`DATABASE_URL` in the schema looks up `MY_APP_DATABASE_URL` in the source.
+
+```ts
+const env = defineEnv(schema, { prefix: "MY_APP_" })
+// Looks up MY_APP_DATABASE_URL, MY_APP_PORT, etc.
+```
+
+## Return Value
+
+Returns a deeply frozen, read-only object. TypeScript infers the type from the schema:
+
+```ts
+const env = defineEnv({
+  DATABASE_URL: string().url(),
+  PORT: number().port().default(3000),
+  DEBUG: boolean().optional(),
+  NODE_ENV: pick(["dev", "prod"]),
+})
+
+// TypeScript infers:
+// env.DATABASE_URL → string
+// env.PORT → number
+// env.DEBUG → boolean | undefined
+// env.NODE_ENV → "dev" | "prod"
+```
+
+### Optional vs Required
+
+- **Required** (default): The value is guaranteed to exist. Type is `T` (non-nullable).
+- **`.optional()`**: Type is `T | undefined`.
+- **`.default(value)`**: Type is `T` (non-nullable), falls back to the default when missing.
+
+## Error Handling
+
+Throws `CtroEnvError` if one or more variables are missing or invalid:
+
+```ts
+try {
+  const env = defineEnv(schema)
+} catch (e) {
+  if (e instanceof CtroEnvError) {
+    for (const err of e.errors) {
+      console.error(`${err.key}: ${err.message}`)
+    }
+    // Or use formatErrors() for a formatted CLI output
+    process.stderr.write(formatErrors(e.errors))
+  }
+}
+```
+
+See [Error Handling](/docs/core/errors) for details on all error types.
+
+## Type Inference
+
+`defineEnv()` uses TypeScript's type system to infer the exact shape of the returned object:
+
+- `string()` → `string`
+- `number()` → `number`
+- `boolean()` → `boolean`
+- `pick(["a", "b"])` → `"a" | "b"`
+- `.optional()` → adds `| undefined`
+- `.default(v)` → removes `| undefined` (value always exists)
+
+The inferred type is correctly reflected in IDE autocomplete and type checking.

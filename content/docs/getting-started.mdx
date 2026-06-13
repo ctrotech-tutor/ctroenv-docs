@@ -1,0 +1,62 @@
+# Getting Started
+
+CtroEnv is a TypeScript-first environment variable management toolkit. Define your schema once, get
+full type inference, validation, and error messages — with zero runtime dependencies.
+
+## Installation
+
+Install the core package:
+
+```bash
+npm install @ctroenv/core
+```
+
+For CLI tooling:
+
+```bash
+npm install @ctroenv/cli
+```
+
+For framework-specific adapters:
+
+```bash
+npm install @ctroenv/node    # Node.js .env loading
+npm install @ctroenv/vite    # Vite plugin
+npm install @ctroenv/nextjs  # Next.js integration
+```
+
+## Quick Example
+
+```ts
+import { defineEnv, string, number, pick } from "@ctroenv/core"
+
+const env = defineEnv({
+  DATABASE_URL: string().url(),
+  PORT: number().port().default(3000),
+  NODE_ENV: pick(["dev", "staging", "prod"]),
+  JWT_SECRET: string().secret().describe("JWT signing secret"),
+})
+
+// TypeScript infers the exact types:
+//   env.DATABASE_URL → string
+//   env.PORT → number (default: 3000)
+//   env.NODE_ENV → "dev" | "staging" | "prod"
+//   env.JWT_SECRET → string
+```
+
+## How It Works
+
+1. **Define a schema** using validator functions (`string()`, `number()`, `boolean()`, `pick()`)
+2. **Chain refinements** like `.url()`, `.min()`, `.default()` to add constraints
+3. **Call `defineEnv()`** to validate against the environment source
+4. **Use the returned object** — TypeScript infers the exact shape
+
+If any variable is missing or invalid, `defineEnv()` throws a `CtroEnvError` with all errors
+collected and formatted.
+
+## Next Steps
+
+- [Quick Start](/docs/getting-started/quick-start) — build your first schema
+- [Core Concepts](/docs/getting-started/core-concepts) — understand validators and schemas
+- [string()](/docs/core/string) — string validation reference
+- [API Reference](/docs/core/define-env) — full `defineEnv` documentation

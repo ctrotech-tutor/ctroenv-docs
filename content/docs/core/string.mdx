@@ -1,0 +1,148 @@
+# string()
+
+Creates a validator that accepts string values.
+
+## Signature
+
+```ts
+function string(): StringValidator
+```
+
+## Accepted Values
+
+Only actual `string` values pass the base validator. Non-strings produce a type error with a
+suggestion to wrap the value in quotes.
+
+```ts
+string().parse("hello")  // ✅ ok: "hello"
+string().parse("")       // ✅ ok: ""
+string().parse(42)       // ❌ type error: "Expected a string, received number"
+string().parse(null)     // ❌ type error
+```
+
+## Refinements
+
+String refinements add additional constraints. They can be chained in any order.
+
+### .url()
+
+Requires the value to be a valid URL (parsed via `new URL()`):
+
+```ts
+const env = defineEnv({
+  API_URL: string().url(),
+})
+// ✅ "https://api.example.com/v1"
+// ❌ "not-a-url"
+```
+
+### .email()
+
+Requires the value to match a basic email pattern:
+
+```ts
+const env = defineEnv({
+  SUPPORT_EMAIL: string().email(),
+})
+// ✅ "user@example.com"
+// ❌ "not-an-email"
+```
+
+Uses the regex: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
+
+### .port()
+
+Requires the value to be a valid port number string (1-65535):
+
+```ts
+const env = defineEnv({
+  REDIS_PORT: string().port(),
+})
+// ✅ "6379"
+// ✅ "65535"
+// ❌ "0"
+// ❌ "70000"
+```
+
+### .min(length)
+
+Requires the string to be at least `length` characters:
+
+```ts
+const env = defineEnv({
+  PASSWORD: string().min(8),
+})
+// ✅ "abcdefgh" (8 characters)
+// ❌ "abc" (too short)
+```
+
+### .max(length)
+
+Requires the string to be at most `length` characters:
+
+```ts
+const env = defineEnv({
+  USERNAME: string().min(3).max(20),
+})
+// ✅ "john_doe"
+// ❌ "ab" (too short)
+// ❌ "a_very_long_username_that_exceeds" (too long)
+```
+
+### .regex(pattern, message?)
+
+Requires the string to match a regular expression:
+
+```ts
+const env = defineEnv({
+  SLUG: string().regex(/^[a-z0-9-]+$/, "Must be a lowercase slug"),
+})
+// ✅ "my-blog-post"
+// ❌ "Invalid slug!"
+
+// Custom error message (optional second parameter)
+string().regex(/^[A-Z]+$/, "Must be uppercase only")
+```
+
+### return value: StringValidator
+
+All refinement methods return a new `StringValidator`, enabling chaining:
+
+```ts
+string().min(1).max(255).url().optional()
+```
+
+The original validator is never mutated.
+
+## Examples
+
+### Basic string
+
+```ts
+const env = defineEnv({
+  APP_NAME: string(),
+})
+// env.APP_NAME: string
+```
+
+### String with constraints
+
+```ts
+const env = defineEnv({
+  DATABASE_URL: string().url().describe("Primary database connection"),
+  JWT_SECRET: string().secret().min(32),
+  NICKNAME: string().min(2).max(30).optional(),
+  EMAIL: string().email(),
+  PORT: string().port(),
+})
+```
+
+### Custom validation
+
+```ts
+const env = defineEnv({
+  API_KEY: string().validate((value) => {
+    if (!value.startsWith("sk_")) return "Must start with 'sk_'"
+  }),
+})
+```
