@@ -28,13 +28,24 @@ export function getContentPaths(): string[] {
 
   function walk(dir: string, prefix: string) {
     if (!fs.existsSync(dir)) return
+    let hasIndex = false
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory()) {
         walk(path.join(dir, entry.name), `${prefix}${entry.name}/`)
       } else if (entry.isFile() && entry.name.endsWith(".mdx")) {
         const slug = entry.name.replace(/\.mdx$/, "")
-        paths.push(`${prefix}${slug}`)
+        if (slug === "index") {
+          hasIndex = true
+        } else {
+          paths.push(`${prefix}${slug}`)
+        }
       }
+    }
+    if (hasIndex && prefix) {
+      paths.push(prefix.slice(0, -1))
+    }
+    if (prefix === "" && hasIndex) {
+      paths.push(prefix)
     }
   }
 
@@ -94,8 +105,11 @@ export function extractToc(body: string): TocItem[] {
 export function loadContent(
   contentPath: string
 ): ContentPage | null {
-  const filePath = path.join(contentDir, `${contentPath}.mdx`)
-  if (!fs.existsSync(filePath)) return null
+  let filePath = path.join(contentDir, `${contentPath}.mdx`)
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(contentDir, contentPath, "index.mdx")
+    if (!fs.existsSync(filePath)) return null
+  }
 
   const raw = fs.readFileSync(filePath, "utf-8")
   const { frontmatter, body, toc } = parseFrontmatter(raw)

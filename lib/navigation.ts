@@ -70,7 +70,7 @@ export const packages = [
   { name: "@ctroenv/node", npm: "https://www.npmjs.com/package/@ctroenv/node", github: pkgPath("node") },
   { name: "@ctroenv/vite", npm: "https://www.npmjs.com/package/@ctroenv/vite", github: pkgPath("vite") },
   { name: "@ctroenv/nextjs", npm: "https://www.npmjs.com/package/@ctroenv/nextjs", github: pkgPath("nextjs") },
-  { name: "@ctroenv/zod", npm: "https://www.npmjs.com/package/@ctroenv/zod", github: pkgPath("zod") },
+  { name: "@ctroenv/shared", npm: "https://www.npmjs.com/package/@ctroenv/shared", github: pkgPath("shared") },
 ]
 
 export const socialLinks = {

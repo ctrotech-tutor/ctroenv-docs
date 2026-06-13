@@ -18,29 +18,19 @@ export function Logo({ size = 32, className, ...props }: LogoProps) {
       {...props}
     >
       <defs>
-        <linearGradient id="logo-g" x1="16" y1="2" x2="16" y2="30">
+        <linearGradient id="logo-g" x1="2" y1="2" x2="30" y2="30">
           <stop stopColor="#14b8a6" />
           <stop offset="1" stopColor="#06b6d4" />
         </linearGradient>
       </defs>
+      <circle cx="16" cy="16" r="14" fill="url(#logo-g)" />
       <path
-        d="M16 2l10 5.773v11.547c0 4.041-2.236 7.724-5.774 9.51L16 30l-4.226-2.17C8.236 27.044 6 23.361 6 19.32V7.773L16 2z"
-        fill="url(#logo-g)"
-      />
-      <path
-        d="M12.5 16a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
-        fill="white"
-        opacity="0.2"
-      />
-      <path
-        d="M14 13.5l2.5 2.5-2.5 2.5"
+        d="M10 10v12h8M10 16h6"
         stroke="white"
-        strokeWidth="2"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeOpacity="0.7"
       />
-      <circle cx="16" cy="16" r="1" fill="white" />
     </svg>
   )
 }
@@ -58,11 +48,14 @@ export function LogoMark({ size = 16, className, ...props }: LogoProps) {
       aria-label="CtroEnv"
       {...props}
     >
+      <circle cx="16" cy="16" r="14" fill="#14b8a6" />
       <path
-        d="M16 2l10 5.773v11.547c0 4.041-2.236 7.724-5.774 9.51L16 30l-4.226-2.17C8.236 27.044 6 23.361 6 19.32V7.773L16 2z"
-        fill="#14b8a6"
+        d="M10 10v12h8M10 16h6"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <circle cx="16" cy="16" r="3" fill="white" />
     </svg>
   )
 }

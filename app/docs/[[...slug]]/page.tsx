@@ -46,7 +46,7 @@ export default async function DocPage({
     <>
       <StickyMobileBar toc={page.toc} />
       <div className="flex flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 gap-8 py-8">
-        <article className="flex-1 min-w-0 max-w-4xl">
+        <article className="flex-1 min-w-0 max-w-4xl overflow-x-auto">
           <Breadcrumbs />
           <CodeBlocks>
             <MdxContent source={page.source} />
