@@ -113,6 +113,9 @@
   code, pre {
     font-family: var(--font-mono, "Geist Mono"), ui-monospace, monospace;
   }
+  :not(pre) > code {
+    @apply rounded-md bg-muted px-1.5 py-0.5 text-sm font-medium;
+  }
 }
 
 .prose {
@@ -130,11 +133,13 @@
   --tw-prose-pre-bg: oklch(0.205 0 0);
 }
 
-[data-rehype-pretty-code-figure] {
+[data-rehype-pretty-code-figure],
+pre.shiki {
   @apply relative;
 }
 
-[data-rehype-pretty-code-figure] pre {
+[data-rehype-pretty-code-figure] pre,
+pre.shiki {
   @apply rounded-lg border p-4 text-sm overflow-x-auto;
   border-color: var(--border);
   background-color: var(--shiki-light-bg);
@@ -142,6 +147,10 @@
 
 .dark [data-rehype-pretty-code-figure] pre {
   background-color: var(--shiki-dark-bg);
+}
+
+.dark pre.shiki {
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 [data-rehype-pretty-code-figure] code,
@@ -152,6 +161,16 @@
 .dark [data-rehype-pretty-code-figure] code,
 .dark [data-rehype-pretty-code-figure] code span {
   color: var(--shiki-dark);
+}
+
+pre.shiki code,
+pre.shiki code span {
+  color: var(--shiki-light);
+}
+
+.dark pre.shiki code,
+.dark pre.shiki code span {
+  color: var(--shiki-dark) !important;
 }
 
 [data-rehype-pretty-code-title] {
