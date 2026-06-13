@@ -1,15 +1,19 @@
-import { type SVGAttributes } from "react"
+import { type SVGAttributes } from "react";
 
 interface LogoProps extends SVGAttributes<SVGSVGElement> {
-  size?: number
+  size?: number;
 }
 
-export function Logo({ size = 32, className, ...props }: LogoProps) {
+export function Logo({
+  size = 32,
+  className,
+  ...props
+}: LogoProps) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 32 32"
+      viewBox="0 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
@@ -18,44 +22,99 @@ export function Logo({ size = 32, className, ...props }: LogoProps) {
       {...props}
     >
       <defs>
-        <linearGradient id="logo-g" x1="2" y1="2" x2="30" y2="30">
-          <stop stopColor="#14b8a6" />
-          <stop offset="1" stopColor="#06b6d4" />
+        <linearGradient
+          id="ctro-gradient"
+          x1="8"
+          y1="6"
+          x2="40"
+          y2="42"
+        >
+          <stop
+            offset="0%"
+            stopColor="var(--primary)"
+          />
+
+          <stop
+            offset="100%"
+            stopColor="var(--accent)"
+          />
         </linearGradient>
+
+        <filter
+          id="glow"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
+        >
+          <feGaussianBlur stdDeviation="3" />
+        </filter>
       </defs>
-      <circle cx="16" cy="16" r="14" fill="url(#logo-g)" />
-      <path
-        d="M10 10v12h8M10 16h6"
-        stroke="white"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+
+      {/* Background shell */}
+      <rect
+        x="4"
+        y="4"
+        width="40"
+        height="40"
+        rx="14"
+        fill="url(#ctro-gradient)"
+      />
+
+      {/* Environment layers */}
+      <rect
+        x="13"
+        y="14"
+        width="22"
+        height="4"
+        rx="2"
+        fill="white"
+        opacity="0.95"
+      />
+
+      <rect
+        x="13"
+        y="22"
+        width="16"
+        height="4"
+        rx="2"
+        fill="white"
+        opacity="0.82"
+      />
+
+      <rect
+        x="13"
+        y="30"
+        width="11"
+        height="4"
+        rx="2"
+        fill="white"
+        opacity="0.68"
+      />
+
+      {/* Active environment */}
+      <circle
+        cx="34"
+        cy="32"
+        r="3"
+        fill="var(--accent)"
+      />
+
+      <circle
+        cx="34"
+        cy="32"
+        r="6"
+        fill="var(--accent)"
+        opacity="0.25"
+        filter="url(#glow)"
       />
     </svg>
-  )
+  );
 }
 
-export function LogoMark({ size = 16, className, ...props }: LogoProps) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      role="img"
-      aria-label="CtroEnv"
-      {...props}
-    >
-      <circle cx="16" cy="16" r="14" fill="#14b8a6" />
-      <path
-        d="M10 10v12h8M10 16h6"
-        stroke="white"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+export function LogoMark({
+  size = 16,
+  ...props
+}: LogoProps) {
+  return <Logo size={size} {...props} />;
 }

@@ -1,0 +1,85 @@
+<svg
+  width="64"
+  height="64"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="CtroEnv Logo"
+>
+  <defs>
+    <linearGradient
+      id="ctro-logo-gradient"
+      x1="8"
+      y1="6"
+      x2="40"
+      y2="42"
+    >
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+
+    <filter id="soft-glow">
+      <feGaussianBlur stdDeviation="2.5" />
+    </filter>
+  </defs>
+
+  <!-- Outer container (system shell) -->
+  <rect
+    x="4"
+    y="4"
+    width="40"
+    height="40"
+    rx="14"
+    fill="url(#ctro-logo-gradient)"
+  />
+
+  <!-- Environment stack -->
+  <rect
+    x="12"
+    y="14"
+    width="24"
+    height="4"
+    rx="2"
+    fill="white"
+    opacity="0.95"
+  />
+
+  <rect
+    x="12"
+    y="22"
+    width="18"
+    height="4"
+    rx="2"
+    fill="white"
+    opacity="0.82"
+  />
+
+  <rect
+    x="12"
+    y="30"
+    width="12"
+    height="4"
+    rx="2"
+    fill="white"
+    opacity="0.65"
+  />
+
+  <!-- Active environment node -->
+  <circle
+    cx="34"
+    cy="32"
+    r="3"
+    fill="#22C55E"
+  />
+
+  <!-- Subtle glow -->
+  <circle
+    cx="34"
+    cy="32"
+    r="6"
+    fill="#22C55E"
+    opacity="0.25"
+    filter="url(#soft-glow)"
+  />
+</svg>
