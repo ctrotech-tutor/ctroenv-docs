@@ -1,0 +1,48 @@
+# v1.1.0 — Secret Masking & Schema Composition
+
+Runtime secret masking that prevents accidental leaks, and schema composition for monorepo-scale env management.
+
+## Secret Masking
+
+Mark sensitive keys with `.secret()` — direct access returns `"********"`, raw values require explicit intent via `env.meta.get()`:
+
+```typescript
+import { defineEnv, string } from "@ctroenv/core"
+
+const env = defineEnv({
+  JWT_SECRET: string().min(32).secret(),
+})
+
+env.JWT_SECRET           // "********" — masked
+env.meta.get("JWT_SECRET") // actual value
+env.meta.keys()          // ["JWT_SECRET"]
+JSON.stringify(env)      // {"JWT_SECRET":"********"}
+```
+
+The env object uses a Proxy to mask values at runtime. Error messages redact secrets too.
+
+## Schema Composition
+
+`defineSchema()` + `extendSchema()` for reusable schema blocks:
+
+```typescript
+import { defineSchema, extendSchema } from "@ctroenv/core"
+
+const base = defineSchema({
+  DATABASE_URL: string().url(),
+})
+
+const apiSchema = extendSchema(base, {
+  PORT: number().port().default(4000),
+})
+```
+
+Extension keys override base. Dev-mode warns on conflicts.
+
+## AGENTS.md
+
+CtroEnv now ships `AGENTS.md` at root — a universal AI agent guide read by opencode, Cursor, Copilot, Claude Code, and Cline.
+
+## Full Changelog
+
+See the [GitHub Release](https://github.com/ctrotech-tutor/ctroenv/releases/tag/v1.1.0) for the complete list of changes.

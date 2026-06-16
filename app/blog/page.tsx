@@ -8,6 +8,13 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "v1-1-0",
+    title: "v1.1.0 — Secret Masking & Schema Composition",
+    date: "June 17, 2026",
+    description:
+      "Runtime secret masking, schema composition for monorepos, and universal AI agent guide.",
+  },
+  {
     slug: "v1-0-1",
     title: "v1.0.1 — Polish & Developer Experience",
     date: "June 13, 2026",

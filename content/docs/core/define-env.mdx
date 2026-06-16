@@ -76,7 +76,7 @@ const env = defineEnv(schema, { prefix: "MY_APP_" })
 
 ## Return Value
 
-Returns a deeply frozen, read-only object. TypeScript infers the type from the schema:
+Returns a read-only `EnvResult<T>` object. TypeScript infers the type from the schema:
 
 ```ts
 const env = defineEnv({
@@ -92,6 +92,14 @@ const env = defineEnv({
 // env.DEBUG → boolean | undefined
 // env.NODE_ENV → "dev" | "prod"
 ```
+
+When no `.secret()` variables are present, the object is deeply frozen.
+When `.secret()` variables exist, the object is wrapped in a **Proxy** that:
+
+- Masks secret value reads with `"********"`
+- Exposes raw values via `env.meta.get("KEY")`
+- Prevents mutation (set, delete)
+- Masks secrets in `JSON.stringify()`
 
 ### Optional vs Required
 

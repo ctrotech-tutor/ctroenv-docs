@@ -79,16 +79,33 @@ const env = defineEnv({
 
 Marks the variable as sensitive. Secret values are:
 
+- **Masked at runtime**: Reading `env.JWT_SECRET` returns `"********"` instead of the real value
 - **Masked in CLI output**: Shown as `••••••••` instead of the actual value
+- **Masked in errors**: Error messages never contain the raw secret value
+- **Masked in serialization**: `JSON.stringify(env)` replaces secrets with `"********"`
 - **Masked in generated docs**: The value is excluded from `.env.example` content
-- **Available at runtime**: The actual value is still accessible in code
 
 ```ts
 const env = defineEnv({
   JWT_SECRET: string().secret(),
   API_KEY: string().secret().describe("Third-party API key"),
 })
+
+console.log(env.JWT_SECRET) // "********"
 ```
+
+### Accessing raw values with `env.meta`
+
+To retrieve the actual secret value, use the `.meta` API:
+
+```ts
+env.meta.get("JWT_SECRET")     // "my-real-secret-token"
+env.meta.has("JWT_SECRET")     // true
+env.meta.keys()                // ["JWT_SECRET", "API_KEY"]
+env.meta.toJSON()              // { JWT_SECRET: "my-real-secret-token", API_KEY: "..." }
+```
+
+The `meta` object is non-enumerable — it won't appear in `Object.keys()`, `for...in`, or `JSON.stringify()`. Access it explicitly when you need the raw value.
 
 ## .validate(fn)
 

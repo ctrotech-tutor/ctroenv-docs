@@ -5,6 +5,11 @@ import { CodeBlocks } from "@/components/code-blocks"
 import { loadBlogPost, getBlogSlugs } from "@/lib/blog"
 
 const posts: Record<string, { title: string; date: string; description: string }> = {
+  "v1-1-0": {
+    title: "v1.1.0 — Secret Masking & Schema Composition",
+    date: "June 17, 2026",
+    description: "Runtime secret masking, schema composition for monorepos, and universal AI agent guide.",
+  },
   "v1-0-1": {
     title: "v1.0.1 — Polish & Developer Experience",
     date: "June 13, 2026",

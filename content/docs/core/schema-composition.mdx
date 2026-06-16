@@ -1,0 +1,132 @@
+---
+title: "Schema Composition"
+description: "Share and extend environment variable schemas across packages with defineSchema and extendSchema."
+---
+
+# Schema Composition
+
+In monorepos, multiple packages often need different subsets of environment variables while sharing common ones. Schema composition lets you define shared contracts once and extend them per-service.
+
+## defineSchema()
+
+Defines a reusable schema block. At runtime it's an identity function — it returns the same object. At type level it preserves exact validator types for extension.
+
+```ts
+import { defineSchema, string, number } from "@ctroenv/core"
+
+export const databaseSchema = defineSchema({
+  DATABASE_URL: string().url().describe("PostgreSQL connection URL"),
+  DATABASE_POOL_SIZE: number().default(10),
+})
+```
+
+## extendSchema()
+
+Merges a base schema with additional validators. Extension keys override base keys when they conflict.
+
+```ts
+import { defineEnv, extendSchema } from "@ctroenv/core"
+import { databaseSchema } from "./database-schema"
+
+export const schema = extendSchema(databaseSchema, {
+  PORT: number().port().default(3000),
+  JWT_SECRET: string().secret(),
+})
+
+export const env = defineEnv(schema)
+```
+
+### Key conflict behavior
+
+When a key exists in both the base and extension, the extension wins:
+
+```ts
+const base = defineSchema({ PORT: number().default(3000) })
+const extended = extendSchema(base, { PORT: number().default(4000) })
+
+extended.PORT.metadata.defaultValue // 4000
+```
+
+In development mode (`NODE_ENV === "development"`), a warning is logged when conflicts occur.
+
+## Monorepo pattern
+
+The recommended pattern for monorepos:
+
+```
+packages/
+  shared/
+    src/
+      index.ts      ← defineSchema with shared validators
+  api/
+    src/
+      env.ts        ← extendSchema + defineEnv
+  worker/
+    src/
+      env.ts        ← extendSchema + defineEnv (different subset)
+```
+
+### Shared schema package
+
+```ts
+// packages/shared/src/index.ts
+import { defineSchema, pick, string } from "@ctroenv/core"
+
+export const base = defineSchema({
+  NODE_ENV: pick(["development", "staging", "production"] as const).default("development"),
+  DATABASE_URL: string().url().secret().describe("PostgreSQL connection URL"),
+  JWT_SECRET: string().min(32).secret().describe("JWT signing secret"),
+})
+```
+
+### Per-service extension
+
+```ts
+// packages/api/src/env.ts
+import { defineEnv, extendSchema, number, string } from "@ctroenv/core"
+import { base } from "@example/shared-config"
+
+const schema = extendSchema(base, {
+  PORT: number().port().default(3000),
+  CORS_ORIGIN: string().url().describe("Allowed CORS origin"),
+})
+```
+
+```ts
+// packages/worker/src/env.ts
+import { defineEnv, extendSchema, number, string } from "@ctroenv/core"
+import { base } from "@example/shared-config"
+
+const schema = extendSchema(base, {
+  QUEUE_CONCURRENCY: number().int().min(1).default(5),
+  WORKER_TIMEOUT: number().int().min(1000).default(30000),
+})
+```
+
+Each service gets exactly the env vars it needs, sharing common validation logic through the base schema.
+
+## Chaining
+
+Schemas can be chained to compose three or more layers:
+
+```ts
+const a = defineSchema({ A: string() })
+const b = defineSchema({ B: string() })
+const c = defineSchema({ C: string() })
+
+const merged = extendSchema(extendSchema(a, b), c)
+```
+
+## TypeScript inference
+
+Composed schemas maintain full type inference through `defineEnv()`:
+
+```ts
+const env = defineEnv(extendSchema(base, {
+  PORT: number().port().default(3000),
+}))
+
+env.PORT          // number
+env.DATABASE_URL  // string
+env.NODE_ENV      // "development" | "staging" | "production"
+```
