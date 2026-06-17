@@ -18,7 +18,8 @@ npm install @ctroenv/nextjs
 Next.js requires splitting environment variables into **server** and **client** schemas:
 
 ```ts
-import { defineEnv, string, number, type NextSchemaDefinition } from "@ctroenv/nextjs"
+import { string, number } from "@ctroenv/core"
+import { defineEnv, type NextSchemaDefinition } from "@ctroenv/nextjs"
 
 const schema = {
   server: {

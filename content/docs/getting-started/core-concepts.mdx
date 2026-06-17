@@ -26,7 +26,7 @@ CtroEnv provides four built-in validators:
 - **`number()`**: Accepts `number` values and numeric strings like `"42"`. Rejects `NaN`,
   `Infinity`, empty strings, and non-numeric strings.
 - **`boolean()`**: Accepts `true`, `false`, numbers `1`/`0`, and strings `"true"`/`"false"`/
-  `"1"`/`"0"` (case-insensitive, trimmed).
+  `"yes"`/`"no"`/`"on"`/`"off"`/`"1"`/`"0"` (case-insensitive, trimmed).
 - **`pick()`**: Only accepts exact string matches from the provided list.
 
 ## Refinements
@@ -102,6 +102,7 @@ An environment source is any object with a `get(key: string) => string | undefin
 | `nodeSource()` | `@ctroenv/node` | Wraps `process.env` explicitly |
 | `viteSource()` | `@ctroenv/vite` | Reads from `import.meta.env` |
 | Plain object | any | Pass `{ KEY: "value" }` directly |
+| `objectSource(obj)` | `@ctroenv/core` | Wrap a plain object as an `EnvSource` |
 
 ## Error Handling
 
@@ -120,7 +121,7 @@ Each `ValidationError` has:
 | `key` | `string` | The environment variable name |
 | `message` | `string` | Human-readable error message |
 | `code` | `ErrorCode` | Machine-readable error code |
-| `value` | `unknown` | The original (invalid) value |
+| `value` | `unknown \| undefined` | The original (invalid) value |
 | `suggestion` | `string \| undefined` | Suggested fix |
 
 ### Error Codes

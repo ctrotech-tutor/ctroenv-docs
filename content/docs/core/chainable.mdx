@@ -132,14 +132,33 @@ The context provides:
 This enables conditional validation based on other values:
 
 ```ts
-const env = defineEnv({
+const schema = {
   NODE_ENV: pick(["dev", "prod"]),
-  DATABASE_URL: string().url().validate((value, { key }) => {
-    if (env.NODE_ENV === "prod" && !value.includes("replica")) {
-      return "Production should use a replica URL"
-    }
-  }),
-})
+  DATABASE_URL: string().url(),
+}
+
+const env = defineEnv(schema)
+```
+
+However, validators cannot reference `env` during definition (it doesn't exist yet).
+For cross-field validation, use a wrapper function:
+
+```ts
+function createSchema() {
+  const nodeEnv = pick(["dev", "prod"])
+  return {
+    NODE_ENV: nodeEnv,
+    DATABASE_URL: string().url().validate((value) => {
+      // Read the raw env value at runtime
+      const raw = process.env.NODE_ENV ?? "dev"
+      if (raw === "prod" && !value.includes("replica")) {
+        return "Production should use a replica URL"
+      }
+    }),
+  }
+}
+
+const env = defineEnv(createSchema())
 ```
 
 > Note: The validate function runs after type checking and other refinements. The value

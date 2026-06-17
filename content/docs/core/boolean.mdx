@@ -15,7 +15,7 @@ function boolean(): BooleanValidator
 ## Accepted Values
 
 | Input | Result | Notes |
-|---|---|---|
+|---|---|---|---|
 | `true` | ✅ `true` | Actual boolean |
 | `false` | ✅ `false` | Actual boolean |
 | `"true"` | ✅ `true` | Case-insensitive, trimmed |
@@ -23,9 +23,12 @@ function boolean(): BooleanValidator
 | `"TRUE"` | ✅ `true` | Case-insensitive |
 | `"1"` | ✅ `true` | String "1" |
 | `"0"` | ✅ `false` | String "0" |
+| `"yes"` | ✅ `true` | Case-insensitive |
+| `"no"` | ✅ `false` | Case-insensitive |
+| `"on"` | ✅ `true` | Case-insensitive |
+| `"off"` | ✅ `false` | Case-insensitive |
 | `1` | ✅ `true` | Number 1 |
 | `0` | ✅ `false` | Number 0 |
-| `"yes"` | ❌ Type error | Not a recognized boolean string |
 | `2` | ❌ Type error | Only 1 and 0 are accepted |
 | `null` | ❌ Type error | |
 

@@ -70,7 +70,7 @@ When variables are missing or invalid, `defineEnv()` throws an error
 with all validation failures:
 
 ```ts
-import { CtroEnvError } from "@ctroenv/core"
+import { CtroEnvError, formatErrors } from "@ctroenv/core"
 import { env } from "./env"
 // ❌ Throws CtroEnvError if DATABASE_URL is missing or not a URL
 ```

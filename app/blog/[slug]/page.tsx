@@ -5,6 +5,31 @@ import { CodeBlocks } from "@/components/code-blocks"
 import { loadBlogPost, getBlogSlugs } from "@/lib/blog"
 
 const posts: Record<string, { title: string; date: string; description: string }> = {
+  "v1-2-0": {
+    title: "v1.2.0 — JSON Config, Env File Parsing, CLI Improvements",
+    date: "June 17, 2026",
+    description: "Smarter env file parsing, JSON configuration support, and check --strict for value validation.",
+  },
+  "secret-masking": {
+    title: "Protecting Secrets at Runtime",
+    date: "June 17, 2026",
+    description: "Runtime secret masking prevents accidental leaks of JWT secrets, API keys, and database credentials.",
+  },
+  "monorepo-env": {
+    title: "Environment Variables in Monorepos",
+    date: "June 17, 2026",
+    description: "Schema composition for reusable env definitions across monorepo packages with extendSchema.",
+  },
+  "why-ctroenv": {
+    title: "Why CtroEnv?",
+    date: "June 17, 2026",
+    description: "Bring the same rigor from your type system to the environment variables your app depends on.",
+  },
+  "v1-1-1": {
+    title: "v1.1.1 — Bug Fixes & Quality Improvements",
+    date: "June 17, 2026",
+    description: "Fixes for env.meta, Next.js server-only key guard, CLI stderr, and boolean validator polish.",
+  },
   "v1-1-0": {
     title: "v1.1.0 — Secret Masking & Schema Composition",
     date: "June 17, 2026",

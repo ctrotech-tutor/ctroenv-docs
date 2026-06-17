@@ -1,0 +1,77 @@
+# v1.2.0 — JSON Config, Env File Parsing, CLI Improvements
+
+Smarter env file parsing, JSON configuration support, and `check --strict` for value validation.
+
+## parseEnvFile Rewrite
+
+`@ctroenv/node`'s `parseEnvFile()` has been rewritten with full `.env` spec support:
+
+```typescript
+import { parseEnvFile } from "@ctroenv/node"
+
+const env = parseEnvFile(`
+  # Database
+  DATABASE_URL=postgres://localhost:5432/myapp
+
+  # Variable interpolation
+  HOST=localhost
+  PORT=3000
+  URL=http://${HOST}:${PORT}
+
+  # Export prefix
+  export NODE_ENV=development
+
+  # Escaped dollar sign
+  DOLLAR=$$
+
+  # Inline comments
+  LOG_LEVEL=debug # only during development
+`)
+
+env.URL     // "http://localhost:3000"
+env.DOLLAR  // "$"
+```
+
+New capabilities:
+- **`$VAR` and `${VAR}` interpolation** — references earlier variables, falls back to `process.env`
+- **`$$` escaping** — produces a literal `$`
+- **Multiline values** — trailing backslash continues on next line
+- **Inline comments** — `KEY=value # comment` strips the comment
+- **`export` prefix** — `export KEY=value` is parsed correctly
+- **Escaped quotes** — `\"` and `\'` inside quoted values
+
+## JSON Configuration
+
+`ctroenv.json` is now a first-class config format alongside `ctroenv.config.ts` and `ctroenv.config.js`:
+
+```bash
+ctroenv init --json
+# Creates ctroenv.json with full or minimal schema
+```
+
+The schema loader also searches for `env.json` and `env.config.json` alongside the existing `.ts`/`.js` variants, giving you more flexibility in how you define your configuration.
+
+## check --strict
+
+The `check` command now validates actual values against your schema:
+
+```bash
+ctroenv check --strict --source .env
+
+# With invalid values in .env:
+# ✗ Value validation errors:
+#   DATABASE_URL    Invalid URL
+#   PORT            Expected a number, received "abc"
+```
+
+Previous releases only reported missing or extra keys. Now every value is run through `defineEnv()` so you catch type mismatches, URL validation failures, and out-of-range numbers at check time.
+
+## Other Changes
+
+- `validate --strict` removed — was dead code since v1.0.0; use `check --strict` instead
+- Config wiring: `sources.default` now correctly feeds into `check --source` and `validate --source` defaults
+- Docs site: comprehensive audit with 13 fixes across documentation pages, READMEs, and skill files
+
+## Full Changelog
+
+See the [GitHub Release](https://github.com/ctrotech-tutor/ctroenv/releases/tag/v1.2.0) for the complete list of changes.

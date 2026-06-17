@@ -90,6 +90,49 @@ const env = defineEnv(schema, {
 This is equivalent to not passing a source at all (the default auto-detection uses
 `process.env` in Node.js), but is useful for explicit readability.
 
+## parseEnvFile()
+
+Parses a `.env` file string into key-value pairs. Supports the full `.env` file syntax.
+
+```ts
+function parseEnvFile(content: string): Record<string, string>
+```
+
+### Features
+
+| Feature | Example | Result |
+|---|---|---|---|
+| Comments | `KEY=val # comment` | `{ KEY: "val" }` |
+| `export` prefix | `export KEY=val` | `{ KEY: "val" }` |
+| Quoted values | `KEY="hello world"` | `{ KEY: "hello world" }` |
+| Multiline (trailing `\`) | `KEY=line one\`<br/>`line two` | `{ KEY: "line one\nline two" }` |
+| Variable interpolation | `URL=$BASE/api` or `URL=\${BASE}/api` | Resolved from earlier keys, then `process.env` |
+| Escaped `$` with `$$` | `KEY=price$$10` | `{ KEY: "price$10" }` |
+| Escaped quotes | `KEY=it's fine` or `KEY="say \"hi\""` | Preserves literal quotes |
+
+### Usage
+
+```ts
+import { parseEnvFile } from "@ctroenv/node"
+import { readFileSync } from "node:fs"
+
+const content = readFileSync(".env", "utf-8")
+const env = parseEnvFile(content)
+// env.DATABASE_URL => "postgres://localhost/db"
+```
+
+### Interpolation Behavior
+
+Variables are resolved from previously parsed keys in the same file, then
+falls back to `process.env`. Forward references are **not** supported —
+variables must be defined before they are used.
+
+```env
+BASE_URL=http://localhost:3000
+API_URL=${BASE_URL}/api/v1
+# API_URL => "http://localhost:3000/api/v1"
+```
+
 ## EnvSource Type
 
 The `EnvSource` type is re-exported for convenience:

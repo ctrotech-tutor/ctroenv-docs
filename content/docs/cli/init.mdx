@@ -4,58 +4,83 @@ description: "Scaffold a new ctroenv configuration file interactively from the C
 ---
 # ctroenv init
 
-Scaffold a new CtroEnv project with schema and configuration files.
+Scaffold a new CtroEnv configuration file.
 
 ## Usage
 
 ```bash
-ctroenv init [directory]
+ctroenv init [options]
 ```
+
+## Options
+
+| Option | Default | Description |
+|---|---|---|
+| `--ts` | default | Generate TypeScript config (`ctroenv.config.ts`) |
+| `--js` | | Generate JavaScript config (`ctroenv.config.js`) |
+| `--json` | | Generate JSON config (`ctroenv.json`) |
+| `--minimal` | | Generate minimal config without optional fields |
 
 ## Examples
 
-### Initialize in current directory
+### TypeScript config (default)
 
 ```bash
 ctroenv init
+# Creates: ctroenv.config.ts
 ```
 
-Creates:
-- `env.ts` — Example schema file
-- `ctroenv.config.ts` — CLI configuration
-- `.env.example` — Generated example env file
-
-### Initialize in a specific directory
+### JavaScript config
 
 ```bash
-ctroenv init my-project
-cd my-project
+ctroenv init --js
+# Creates: ctroenv.config.js
+```
+
+### JSON config
+
+```bash
+ctroenv init --json
+# Creates: ctroenv.json
+```
+
+### Minimal config
+
+```bash
+ctroenv init --minimal
+# Creates: ctroenv.config.ts with only the schema field
+ctroenv init --json --minimal
+# Creates: ctroenv.json with only the schema field
 ```
 
 ## Generated Files
 
-### env.ts
-
-```ts
-import { defineEnv, string, number, pick } from "@ctroenv/core"
-
-export const env = defineEnv({
-  NODE_ENV: pick(["development", "production"]).default("development"),
-  PORT: number().port().default(3000),
-  DATABASE_URL: string().url().describe("Primary database connection"),
-})
-```
-
-### ctroenv.config.ts
+When using `--ts` or `--js`:
 
 ```ts
 import { defineConfig } from "@ctroenv/cli"
 
 export default defineConfig({
-  schema: "./env.ts",
-  output: {
-    example: ".env.example",
-    docs: "ENV.md",
-  },
+  schema: "./src/env.ts",
+  // ...
 })
+```
+
+When using `--json`:
+
+```json
+{
+  "schema": "./src/env.ts",
+  "sources": {
+    "default": ".env"
+  },
+  "output": {
+    "example": ".env.example",
+    "docs": "ENVIRONMENT.md"
+  },
+  "secrets": {
+    "mask": [],
+    "maskWith": "***"
+  }
+}
 ```

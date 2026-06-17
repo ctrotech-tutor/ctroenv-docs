@@ -4,9 +4,20 @@ description: "Configure the ctroenv CLI with ctroenv.json or programmatic option
 ---
 # CLI Configuration
 
-Configure the CLI behavior with a `ctroenv.config.ts` file in your project root.
+Configure the CLI behavior with a config file in your project root.
 
-## defineConfig()
+## Supported Formats
+
+| Format | File Name | Type Safety |
+|---|---|---|
+| TypeScript | `ctroenv.config.ts` | Full autocomplete with `defineConfig()` |
+| JavaScript | `ctroenv.config.js` | JSDoc hints via `@type` |
+| JSON | `ctroenv.json` | Simple, no imports needed |
+
+The CLI auto-detects which file to load. If multiple exist, the first found
+in the order above is used.
+
+## TypeScript (recommended)
 
 ```ts
 import { defineConfig } from "@ctroenv/cli"
@@ -16,8 +27,30 @@ export default defineConfig({
 })
 ```
 
-`defineConfig()` is a type-safe helper that provides autocomplete and type checking.
-At runtime it simply returns the config object.
+`defineConfig()` provides autocomplete and type checking. At runtime it simply
+returns the config object.
+
+## JSON
+
+```json
+{
+  "schema": "./src/env.ts",
+  "sources": {
+    "default": ".env"
+  },
+  "output": {
+    "example": ".env.example",
+    "docs": "ENVIRONMENT.md"
+  },
+  "secrets": {
+    "mask": ["JWT_SECRET"],
+    "maskWith": "***"
+  }
+}
+```
+
+JSON configs are parsed natively — no transformation or imports are needed.
+Use `ctroenv init --json` to generate one.
 
 ## Configuration Options
 
@@ -39,7 +72,7 @@ interface CliConfig {
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `schema` | `string` | `"./src/env.ts"` | Path to the schema file |
-| `sources.env` | `string` | `".env"` | Path to the .env file |
+| `sources.default` | `string` | `".env"` | Path to the default .env file |
 | `output.example` | `string` | `".env.example"` | Output path for `generate` |
 | `output.docs` | `string` | `"ENV.md"` | Output path for `docs` command |
 | `secrets.mask` | `string[]` | `[]` | Keys to mask in output |
@@ -72,7 +105,7 @@ import { defineConfig } from "@ctroenv/cli"
 export default defineConfig({
   schema: "./src/env.ts",
   sources: {
-    env: ".env",
+    default: ".env",
   },
   output: {
     example: ".env.example",

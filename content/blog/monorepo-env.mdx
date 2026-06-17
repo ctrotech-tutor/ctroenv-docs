@@ -1,0 +1,98 @@
+# Environment Variables in Monorepos
+
+Monorepos create a tension: shared infrastructure needs shared env vars, but each package needs its own overrides. CtroEnv's schema composition gives you both.
+
+## The Monorepo Problem
+
+In a typical monorepo, different packages need different env vars:
+
+- A **database package** needs `DATABASE_URL` and `DB_POOL_SIZE`
+- An **API package** needs `PORT`, `CORS_ORIGIN`, and the database vars
+- A **worker package** needs `QUEUE_URL` and `JWT_SECRET`
+- A **shared config package** might define `NODE_ENV` and `LOG_LEVEL` for everyone
+
+Without schema composition, you either duplicate definitions across packages or create a single monolithic schema that every package depends on — even when it shouldn't.
+
+## Schema Composition
+
+`defineSchema()` and `extendSchema()` let you compose schemas like building blocks:
+
+```typescript
+// packages/shared/src/env.ts
+import { defineSchema, string, number } from "@ctroenv/core"
+
+export const baseSchema = defineSchema({
+  NODE_ENV: pick(["development", "production", "test"] as const)
+    .default("development"),
+  LOG_LEVEL: pick(["debug", "info", "warn", "error"] as const)
+    .default("info"),
+})
+```
+
+```typescript
+// packages/database/src/env.ts
+import { extendSchema, string, number } from "@ctroenv/core"
+import { baseSchema } from "@myapp/shared"
+
+export const dbSchema = extendSchema(baseSchema, {
+  DATABASE_URL: string().url(),
+  DB_POOL_SIZE: number().int().min(1).max(100).default(10),
+})
+```
+
+```typescript
+// packages/api/src/env.ts
+import { extendSchema, string, number } from "@ctroenv/core"
+import { dbSchema } from "@myapp/database"
+
+export const apiSchema = extendSchema(dbSchema, {
+  PORT: number().port().default(4000),
+  CORS_ORIGIN: string().url(),
+  JWT_SECRET: string().min(32).secret(),
+})
+```
+
+Each package only imports the schema it needs. The API package inherits the database vars without redefining them.
+
+## Validation at Package Boundary
+
+Each package validates its own env at startup:
+
+```typescript
+// packages/api/src/index.ts
+import { defineEnv } from "@ctroenv/core"
+import { apiSchema } from "./env"
+
+const env = defineEnv(apiSchema)
+// All 7 variables validated at once
+```
+
+If the database team adds a `DB_SSL` field, the API package picks it up automatically when it rebuilds — no manual synchronization needed.
+
+## CLI for CI
+
+Validate the entire monorepo in CI:
+
+```bash
+ctroenv validate --source .env
+# Checks every schema across all packages
+```
+
+## Extending Third-Party Schemas
+
+Schema composition also works when consuming external packages. If a library exposes its schema, extend it:
+
+```typescript
+import { extendSchema } from "@ctroenv/core"
+import { someLibrarySchema } from "@vendor/library"
+
+const mySchema = extendSchema(someLibrarySchema, {
+  MY_VAR: string(),
+})
+```
+
+Dev-mode warns on key conflicts, so you know immediately if two schemas define the same variable with different validators.
+
+## Full Changelog
+
+See the [GitHub Release](https://github.com/ctrotech-tutor/ctroenv/releases/tag/v1.2.0) for the complete list of changes.
