@@ -1,0 +1,38 @@
+# v1.1.1 — Bug Fixes & Quality Improvements
+
+Fixes for `env.meta`, Next.js server-only key guard, CLI stderr, and more.
+
+## env.meta always present
+
+Previously, `env.meta` only existed when at least one variable was marked `.secret()`. Now `env.meta` is always present — the type wasn't lying, but the runtime was.
+
+```typescript
+const env = defineEnv({ PORT: number().port() })
+env.meta.keys() // ["PORT"] — works even without secrets
+```
+
+## Next.js server-only key guard
+
+The server-only error was dead code on the client — it checked `key in server` but `server` was always `{}` on the client, so the error was never thrown and silently returned `undefined`. The proxy now receives the server key names directly.
+
+## CLI errors go to stderr
+
+All error output now uses `process.stderr`, keeping `process.stdout` clean for piping and JSON output.
+
+## `init --js` generates ESM
+
+The JavaScript template was using `require()`/`module.exports` but `@ctroenv/cli` is `"type": "module"`. Templates now use `import`/`export default`.
+
+## Smaller fixes
+
+- `extendSchema()` guards against non-Node runtimes
+- `NO_COLOR=""` disables colors per spec
+- Boolean validator accepts `yes`/`no`/`on`/`off`
+- `--watch` mode watches schema + source, not whole CWD
+- `withCtroEnv()` throws instead of `process.exit(1)`
+- Dead `errCoerce` / `coercion_failed` removed
+- Tagline removed from `formatErrors()` output
+
+## Full Changelog
+
+See the [GitHub Release](https://github.com/ctrotech-tutor/ctroenv/releases/tag/v1.1.1) for the complete list of changes.

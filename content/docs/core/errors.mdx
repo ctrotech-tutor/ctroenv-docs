@@ -49,7 +49,6 @@ const ErrorCode = {
   TypeMismatch: "type_mismatch",
   InvalidValue: "invalid_value",
   ValidationFailed: "validation_failed",
-  CoercionFailed: "coercion_failed",
 } as const
 ```
 
@@ -98,10 +97,6 @@ defineEnv({
 // ✗ Must start with 'sk_'
 ```
 
-### coercion_failed
-
-The value could not be coerced to the target type. Used by `errCoerce()` in validators.
-
 ## formatErrors()
 
 Produces a structured, colorized CLI output from an array of errors:
@@ -137,7 +132,7 @@ colorized ANSI output when the terminal supports it. Respects `NO_COLOR`, `CI`, 
 The internal error factory functions are exported for custom validators:
 
 ```ts
-import { errMissing, errType, errInvalid, errCoerce, errWrap } from "@ctroenv/core"
+import { errMissing, errType, errInvalid, errWrap } from "@ctroenv/core"
 
 // Create a missing-required error
 errMissing("DATABASE_URL", {
@@ -151,9 +146,6 @@ errType("PORT", "string", "a number", {
 
 // Create an invalid value error
 errInvalid("API_URL", "not-a-url", "Invalid URL format") // code: "invalid_value"
-
-// Create a coercion error
-errCoerce("COUNT", "abc", "number") // code: "coercion_failed"
 
 // Create an error with a custom code
 errWrap("KEY", value, "Custom error", ErrorCode.ValidationFailed)
