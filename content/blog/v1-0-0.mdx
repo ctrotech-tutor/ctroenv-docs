@@ -1,24 +1,20 @@
 # v1.0.0 — Type-Safe Environment Variables for TypeScript
 
-We're excited to announce the initial release of CtroEnv — a TypeScript-first environment
-variable management toolkit.
+CtroEnv v1.0.0 is live — a TypeScript-first environment variable management toolkit with zero runtime dependencies.
 
 ## What is CtroEnv?
 
-CtroEnv lets you define, validate, and infer types for environment variables with zero
-runtime dependencies. It's designed to be the simplest, most type-safe way to handle
-`process.env` in your TypeScript applications.
+Define, validate, and infer types for environment variables. 4 KB gzipped, zero dependencies, full TypeScript inference, no code generation step.
 
 ## Why Another Env Library?
 
-Existing solutions have compromises:
+Existing solutions have tradeoffs:
 
 - **dotenv**: Loads `.env` files but provides no validation or type safety
-- **t3-env**: Great pattern but requires Zod (50KB+ dependency)
-- **envalid**: Solid but lacks TypeScript-native inference and modern DX
+- **t3-env**: Great pattern but requires Zod (50 KB+ dependency)
+- **envalid**: Solid but lacks TypeScript-native inference
 
-CtroEnv is built from scratch with zero dependencies, TypeScript-native inference, and
-beautiful error messages.
+CtroEnv is built from scratch with zero dependencies, native TypeScript inference, and errors grouped by category with actionable suggestions.
 
 ## What's Included
 
