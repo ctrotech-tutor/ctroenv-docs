@@ -1,0 +1,49 @@
+# Turbopack Compat, Better Types, and Quality Improvements
+
+Three fixes that make CtroEnv work seamlessly with modern tooling and feel more polished.
+
+## Turbopack Compatible Build Validation
+
+The `withCtroEnv()` Next.js wrapper previously ran validation inside a `webpack` config hook. With Next.js 16 defaulting to Turbopack, that validation was silently skipped.
+
+Validation now runs **eagerly** at config load time — before any bundler touches your code:
+
+```ts
+// next.config.ts — works with webpack, Turbopack, or any future bundler
+export default withCtroEnv(schema, nextConfig)
+```
+
+Errors are caught immediately when the config is loaded, not buried inside a build step. The behavior is identical — failed validation still exits with code 1 — but it now works regardless of which bundler Next.js uses.
+
+## pick() Without as const
+
+`pick()` now uses a const type parameter, eliminating the need for `as const` on every call:
+
+```typescript
+// Before — required as const for literal types
+const env = defineEnv({
+  NODE_ENV: pick(["dev", "prod", "test"] as const),
+})
+
+// After — as const is automatic
+const env = defineEnv({
+  NODE_ENV: pick(["dev", "prod", "test"]),
+})
+```
+
+The inferred type is `"dev" | "prod" | "test"` in both cases. One less thing to remember.
+
+## env.meta.get() Returns string | undefined
+
+`env.meta.get("KEY")` now returns `string | undefined` instead of `unknown`:
+
+```typescript
+const raw = env.meta.get("JWT_SECRET")
+//    ^? string | undefined — no cast needed
+```
+
+Since env values are always strings at runtime, the return type now reflects reality. The `undefined` case handles missing keys, matching standard JavaScript access patterns.
+
+## Full Changelog
+
+See the [GitHub Release](https://github.com/ctrotech-tutor/ctroenv/releases/tag/v1.2.0) for the complete list of changes.

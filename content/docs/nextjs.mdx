@@ -74,7 +74,7 @@ Prefix it with NEXT_PUBLIC_ to expose it to the client bundle.
 
 ## withCtroEnv()
 
-Wraps your Next.js config to validate environment variables during the build:
+Validates environment variables at config load time, before your app starts building:
 
 ```ts
 // next.config.ts
@@ -88,8 +88,9 @@ const nextConfig: NextConfig = {
 export default withCtroEnv(schema, nextConfig)
 ```
 
-The wrapper adds a `webpack` hook that validates variables during server-side builds.
-If validation fails, errors are logged and the build exits with code 1.
+Validation runs eagerly when the config is loaded, so it works with **any bundler** — webpack,
+Turbopack, or whatever comes next. If validation fails, errors are logged and the build
+exits with code 1.
 
 Composes with any existing `webpack` function in your config.
 

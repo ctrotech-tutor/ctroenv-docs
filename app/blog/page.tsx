@@ -8,6 +8,13 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "turbopack-and-quality",
+    title: "Turbopack Compat, Better Types, and Quality Improvements",
+    date: "June 17, 2026",
+    description:
+      "Eager validation for Turbopack, const type parameter for pick(), and string | undefined for env.meta.get().",
+  },
+  {
     slug: "v1-2-0",
     title: "v1.2.0 — JSON Config, Env File Parsing, CLI Improvements",
     date: "June 17, 2026",
