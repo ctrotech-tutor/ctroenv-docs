@@ -57,7 +57,7 @@ export default async function DocPage({
     <>
       <StickyMobileBar toc={page.toc} />
       <div className="flex flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 gap-8 py-8">
-        <article className="flex-1 min-w-0 max-w-4xl overflow-x-hidden">
+        <article className="flex-1 min-w-0 max-w-4xl">
           <Breadcrumbs />
           <CodeBlocks>
             <MdxContent source={page.source} />
@@ -65,9 +65,7 @@ export default async function DocPage({
           <PrevNext />
         </article>
         <aside className="hidden xl:block w-56 shrink-0">
-          <div className="sticky top-24">
-            <OnThisPage items={page.toc} />
-          </div>
+          <OnThisPage items={page.toc} />
         </aside>
       </div>
     </>

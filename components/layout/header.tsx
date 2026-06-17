@@ -56,12 +56,12 @@ export function Header() {
         <div className="flex flex-1 items-center justify-end gap-1.5">
           <button
             onClick={() => setSearchOpen(true)}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Search docs"
           >
             <SearchIcon className="size-4" />
-            <span className="hidden md:inline">Search</span>
-            <kbd className="hidden md:inline-flex items-center gap-0.5 rounded-md border border-border/50 bg-muted/50 px-1.5 py-0.5 text-xs text-muted-foreground/60">
+            <span>Search</span>
+            <kbd className="inline-flex items-center gap-0.5 rounded-md border border-border/50 bg-muted/50 px-1.5 py-0.5 text-xs text-muted-foreground/60">
               <span className="text-[10px]">⌘</span>K
             </kbd>
           </button>

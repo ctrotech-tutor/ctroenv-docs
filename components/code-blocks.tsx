@@ -17,6 +17,8 @@ export function CodeBlocks({ children }: { children: React.ReactNode }) {
       const code = figure.querySelector("code")
       if (!pre || !code) continue
 
+      figure.style.overflowX = "auto"
+
       const text = code.textContent ?? ""
       const lang = pre.getAttribute("data-language") ?? ""
 
