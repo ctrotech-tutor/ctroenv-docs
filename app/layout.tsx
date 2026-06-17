@@ -29,12 +29,16 @@ export const metadata: Metadata = {
   description:
     "Define, validate, and infer types for environment variables with zero runtime dependencies. CtroEnv gives you beautiful error messages, framework adapters, and CLI tooling.",
   metadataBase: new URL("https://ctroenv.vercel.app"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "CtroEnv — Type-Safe Environment Variables",
     description:
       "Define, validate, and infer types for environment variables with zero runtime dependencies.",
     siteName: "CtroEnv",
     type: "website",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
@@ -44,6 +48,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.svg",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 
@@ -59,6 +67,28 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-background font-sans antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "CtroEnv",
+              url: "https://ctroenv.vercel.app",
+              description:
+                "Define, validate, and infer types for environment variables with zero runtime dependencies.",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate:
+                    "https://ctroenv.vercel.app/docs?search={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
         {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
           <Script
             defer

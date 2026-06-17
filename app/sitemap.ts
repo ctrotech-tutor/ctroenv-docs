@@ -1,42 +1,69 @@
+import fs from "fs"
+import path from "path"
 import type { MetadataRoute } from "next"
+import { getContentPaths } from "@/lib/mdx"
+import { getBlogSlugs } from "@/lib/blog"
 
 const baseUrl = "https://ctroenv.vercel.app"
 
-const routes = [
-  "",
-  "/docs",
-  "/docs/getting-started",
-  "/docs/getting-started/quick-start",
-  "/docs/getting-started/core-concepts",
-  "/docs/core/define-env",
-  "/docs/core/string",
-  "/docs/core/number",
-  "/docs/core/boolean",
-  "/docs/core/pick",
-  "/docs/core/chainable",
-  "/docs/core/refinements",
-  "/docs/core/errors",
-  "/docs/cli",
-  "/docs/cli/validate",
-  "/docs/cli/generate",
-  "/docs/cli/check",
-  "/docs/cli/docs",
-  "/docs/cli/init",
-  "/docs/cli/configuration",
-  "/docs/node",
-  "/docs/vite",
-  "/docs/nextjs",
-  "/docs/migration/from-t3-env",
-  "/docs/migration/from-envalid",
-  "/docs/migration/from-dotenv",
-  "/blog",
-]
+function getFileLastmod(filePath: string): Date {
+  try {
+    const stat = fs.statSync(filePath)
+    return stat.mtime
+  } catch {
+    return new Date()
+  }
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return routes.map((route) => ({
-    url: `${baseUrl}${route}`,
+  const entries: MetadataRoute.Sitemap = []
+
+  entries.push({
+    url: baseUrl,
     lastModified: new Date(),
-    changeFrequency: route === "" ? "monthly" : "weekly",
-    priority: route === "" ? 1 : 0.8,
-  }))
+    changeFrequency: "monthly",
+    priority: 1,
+  })
+
+  const staticRoutes = [
+    "/docs",
+    "/blog",
+  ]
+
+  for (const route of staticRoutes) {
+    entries.push({
+      url: `${baseUrl}${route}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    })
+  }
+
+  const contentDir = path.join(process.cwd(), "content", "docs")
+  const docPaths = getContentPaths()
+  for (const docPath of docPaths) {
+    const filePath = path.join(contentDir, `${docPath}.mdx`)
+    const lastmod = getFileLastmod(filePath)
+    entries.push({
+      url: `${baseUrl}/docs/${docPath}`,
+      lastModified: lastmod,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    })
+  }
+
+  const blogDir = path.join(process.cwd(), "content", "blog")
+  const slugs = getBlogSlugs()
+  for (const slug of slugs) {
+    const filePath = path.join(blogDir, `${slug}.mdx`)
+    const lastmod = getFileLastmod(filePath)
+    entries.push({
+      url: `${baseUrl}/blog/${slug}`,
+      lastModified: lastmod,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    })
+  }
+
+  return entries
 }

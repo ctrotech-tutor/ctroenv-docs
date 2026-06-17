@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import type { Metadata } from "next"
 import { loadContent, getContentPaths } from "@/lib/mdx"
 import { MdxContent } from "@/components/mdx-content"
 import { Breadcrumbs } from "@/components/breadcrumbs"
@@ -18,17 +19,25 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug?: string[] }>
-}) {
+}): Promise<Metadata> {
   const { slug } = await params
   const contentPath = slug?.join("/") || "getting-started"
   const page = loadContent(contentPath)
   if (!page) return {}
+
+  const url = `/docs/${contentPath}`
 
   return {
     title: page.frontmatter.title
       ? `${page.frontmatter.title} | ctroenv Docs`
       : "ctroenv Docs",
     description: page.frontmatter.description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: page.frontmatter.title ?? undefined,
+      description: page.frontmatter.description,
+      url,
+    },
   }
 }
 

@@ -2,58 +2,12 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { MdxContent } from "@/components/mdx-content"
 import { CodeBlocks } from "@/components/code-blocks"
-import { loadBlogPost, getBlogSlugs } from "@/lib/blog"
+import { getAllPosts, loadBlogPost } from "@/lib/blog"
 
-const posts: Record<string, { title: string; date: string; description: string }> = {
-  "turbopack-and-quality": {
-    title: "Turbopack Compat, Better Types, and Quality Improvements",
-    date: "June 17, 2026",
-    description: "Eager validation for Turbopack, const type parameter for pick(), and string | undefined for env.meta.get().",
-  },
-  "v1-2-0": {
-    title: "v1.2.0 — JSON Config, Env File Parsing, CLI Improvements",
-    date: "June 17, 2026",
-    description: "Smarter env file parsing, JSON configuration support, and check --strict for value validation.",
-  },
-  "secret-masking": {
-    title: "Protecting Secrets at Runtime",
-    date: "June 17, 2026",
-    description: "Runtime secret masking prevents accidental leaks of JWT secrets, API keys, and database credentials.",
-  },
-  "monorepo-env": {
-    title: "Environment Variables in Monorepos",
-    date: "June 17, 2026",
-    description: "Schema composition for reusable env definitions across monorepo packages with extendSchema.",
-  },
-  "why-ctroenv": {
-    title: "Why CtroEnv?",
-    date: "June 17, 2026",
-    description: "Bring the same rigor from your type system to the environment variables your app depends on.",
-  },
-  "v1-1-1": {
-    title: "v1.1.1 — Bug Fixes & Quality Improvements",
-    date: "June 17, 2026",
-    description: "Fixes for env.meta, Next.js server-only key guard, CLI stderr, and boolean validator polish.",
-  },
-  "v1-1-0": {
-    title: "v1.1.0 — Secret Masking & Schema Composition",
-    date: "June 17, 2026",
-    description: "Runtime secret masking, schema composition for monorepos, and universal AI agent guide.",
-  },
-  "v1-0-1": {
-    title: "v1.0.1 — Polish & Developer Experience",
-    date: "June 13, 2026",
-    description: "Error message refinement, performance benchmarks, and bundle size optimization.",
-  },
-  "v1-0-0": {
-    title: "v1.0.0 — Type-Safe Environment Variables for TypeScript",
-    date: "June 2026",
-    description: "Initial release of CtroEnv: define, validate, and infer types for environment variables.",
-  },
-}
+const baseUrl = "https://ctroenv.vercel.app"
 
 export function generateStaticParams() {
-  return getBlogSlugs().map((slug) => ({ slug }))
+  return getAllPosts().map((post) => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({
@@ -62,9 +16,32 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const post = posts[slug]
+  const posts = getAllPosts()
+  const post = posts.find((p) => p.slug === slug)
   if (!post) return {}
-  return { title: post.title, description: post.description }
+
+  const url = `${baseUrl}/blog/${slug}`
+
+  return {
+    title: post.title,
+    description: post.description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      url,
+      type: "article",
+      publishedTime: post.date,
+      authors: [post.author],
+      tags: post.tags,
+      siteName: "CtroEnv",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+    },
+  }
 }
 
 export default async function BlogPost({
@@ -73,15 +50,60 @@ export default async function BlogPost({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const post = posts[slug]
+  const posts = getAllPosts()
+  const meta = posts.find((p) => p.slug === slug)
   const content = loadBlogPost(slug)
-  if (!post || !content) notFound()
+  if (!meta || !content) notFound()
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: meta.title,
+    description: meta.description,
+    datePublished: meta.date,
+    author: {
+      "@type": "Person",
+      name: meta.author,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Ctrotech",
+    },
+    url: `${baseUrl}/blog/${slug}`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${baseUrl}/blog/${slug}`,
+    },
+  }
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">{post.title}</h1>
-        <time className="mt-2 block text-sm text-muted-foreground">{post.date}</time>
+        <h1 className="text-3xl font-bold tracking-tight">{meta.title}</h1>
+        <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+          <time dateTime={meta.date}>{meta.date}</time>
+          <span aria-hidden="true">·</span>
+          <span>{meta.author}</span>
+          {meta.tags.length > 0 && (
+            <>
+              <span aria-hidden="true">·</span>
+              <div className="flex gap-1.5">
+                {meta.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </header>
       <CodeBlocks>
         <MdxContent source={content.source} />

@@ -1,0 +1,74 @@
+---
+title: "Composite Source Detection — Turbopack and Client-Side Compatibility"
+description: "How detectSource() now prefers import.meta.env for dynamic NEXT_PUBLIC access in Next.js 16 Turbopack client bundles."
+date: "2026-06-17"
+author: "Ctrotech"
+tags: ["release", "tech-deep-dive"]
+---
+
+# Composite Source Detection — Turbopack and Client-Side Compatibility
+
+When CtroEnv runs in the browser — inside a Sanity Studio configuration, a client component, or any client-bundled code — it needs to access `NEXT_PUBLIC_*` environment variables that Next.js provides at runtime. But how those variables are exposed depends on your bundler.
+
+## The Problem
+
+In Next.js with webpack, `NEXT_PUBLIC_*` values are inlined at compile time via `DefinePlugin`. Static access like `process.env.NEXT_PUBLIC_X` gets replaced with the literal value. But dynamic access — `process.env["NEXT_PUBLIC_X"]` — is not replaced, because the bundler can't statically analyze bracket notation.
+
+CtroEnv's `detectSource()` function creates an `EnvSource` that looks up values dynamically:
+
+```typescript
+// Simplified — the old approach
+const source = { get: (key) => process.env[key] }
+```
+
+On the server this is fine — `process.env` has everything. But in a Next.js client bundle with webpack, `process.env` is polyfilled but `process.env["NEXT_PUBLIC_X"]` returns `undefined`. The polyfill object exists, but the values were only embedded for static property access patterns.
+
+## Turbopack Changes the Rules
+
+Next.js 16 defaults to Turbopack, which handles environment variables differently. Turbopack provides `import.meta.env` as a runtime object — an actual JavaScript `Object` with all `NEXT_PUBLIC_*` values set on it. Dynamic access via `import.meta.env["NEXT_PUBLIC_X"]` works because the values are real properties on a real object.
+
+But `detectSource()` checked `process.env` first, and on the client `process` is polyfilled (truthy check passes), so it returned the `process.env` source. Dynamic access failed. `import.meta.env` was never reached.
+
+## The Fix: Composite Source
+
+`detectSource()` now returns a **composite source** that tries `import.meta.env` first, then falls back to `process.env`:
+
+```typescript
+detectSource() → composite EnvSource {
+  get(key) {
+    const fromMeta = import.meta.env[key]  // Turbopack client: works
+    if (fromMeta !== undefined) return fromMeta
+    return process.env[key]                // Node.js server: works
+  }
+}
+```
+
+This handles all three environments:
+
+| Environment | Primary Source | Fallback |
+|---|---|---|
+| Node.js server | — | `process.env` (no `import.meta.env`) |
+| Turbopack client | `import.meta.env` (dynamic access works) | `process.env` |
+| Webpack client | — | `process.env` (dynamic access still fails — needs explicit source) |
+
+For webpack-based Next.js projects, users should pass an explicit source with statically-accessed values:
+
+```typescript
+defineEnv(schema, {
+  source: {
+    NEXT_PUBLIC_X: process.env.NEXT_PUBLIC_X, // replaced at compile time
+  },
+})
+```
+
+## Adapter Update
+
+The `@ctroenv/nextjs` adapter's `defineEnv()` previously hardcoded `{ get: (key) => process.env[key] }` as its source. It now uses `detectSource()` from `@ctroenv/core`, so both adapters benefit from the composite source behavior.
+
+## Impact
+
+This fix primarily affects projects using CtroEnv with client-bundled code — Sanity Studio configurations, client component env validation, or any `defineEnv()` call that executes in the browser. If you're using Turbopack (Next.js 15+ default), the fix is seamless. Webpack users need the explicit source workaround.
+
+## Full Changelog
+
+See the [GitHub Release](https://github.com/ctrotech-tutor/ctroenv/releases/tag/core-v1.2.2) for the complete list of changes.
