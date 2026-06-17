@@ -75,9 +75,11 @@ function highlightSnippet(
   )
 }
 
+import { useSearch } from "@/lib/search-context"
+
 export function SearchDialog() {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const { open, setOpen } = useSearch()
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<FuseResult<SearchDocument>[]>([])
   const fuseRef = useRef<Fuse<SearchDocument> | null>(null)
@@ -111,7 +113,7 @@ export function SearchDialog() {
     }
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [])
+  }, [setOpen])
 
   useEffect(() => {
     if (!fuseRef.current || !query) {

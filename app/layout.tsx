@@ -4,6 +4,8 @@ import Script from "next/script"
 import { Providers } from "@/components/providers"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { SearchDialog } from "@/components/search-dialog"
+import { MobileTabs } from "@/components/layout/mobile-tabs"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -98,13 +100,15 @@ export default function RootLayout({
           />
         )}
         <Providers>
-          <div className="flex min-h-dvh flex-col">
+          <SearchDialog />
+          <div className="flex min-h-dvh flex-col overflow-x-hidden max-w-[100vw] pb-16 md:pb-0">
             <Header />
             <div className="flex flex-1">
               <main className="flex-1">{children}</main>
             </div>
             <Footer />
           </div>
+          <MobileTabs />
         </Providers>
       </body>
     </html>
