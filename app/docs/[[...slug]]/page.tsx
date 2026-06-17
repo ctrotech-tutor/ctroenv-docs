@@ -15,6 +15,8 @@ export function generateStaticParams() {
   })
 }
 
+const baseUrl = "https://ctroenv.vercel.app"
+
 export async function generateMetadata({
   params,
 }: {
@@ -25,7 +27,7 @@ export async function generateMetadata({
   const page = loadContent(contentPath)
   if (!page) return {}
 
-  const url = `/docs/${contentPath}`
+  const url = `${baseUrl}/docs/${contentPath}`
 
   return {
     title: page.frontmatter.title

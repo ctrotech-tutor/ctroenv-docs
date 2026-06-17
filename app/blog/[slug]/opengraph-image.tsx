@@ -1,7 +1,15 @@
 import { ImageResponse } from "next/og"
 import { getAllPosts } from "@/lib/blog"
+import {
+  OgContainer,
+  OgSmallLogo,
+  OgAccentLine,
+  OgTagPill,
+  OG_WIDTH,
+  OG_HEIGHT,
+} from "@/lib/og-image"
 
-export const size = { width: 1200, height: 630 }
+export const size = { width: OG_WIDTH, height: OG_HEIGHT }
 export const contentType = "image/png"
 
 export default async function Image({
@@ -15,9 +23,10 @@ export default async function Image({
 
   const title = post?.title ?? "CtroEnv Blog"
   const description = post?.description ?? ""
+  const tags = post?.tags ?? []
 
   return new ImageResponse(
-    (
+    <OgContainer>
       <div
         style={{
           display: "flex",
@@ -26,20 +35,17 @@ export default async function Image({
           justifyContent: "center",
           width: "100%",
           height: "100%",
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-          color: "#f8fafc",
-          fontFamily: "system-ui, sans-serif",
-          padding: "80px",
         }}
       >
+        <OgSmallLogo label="Blog" />
         <div
           style={{
-            fontSize: "52px",
+            fontSize: "38px",
             fontWeight: 700,
             letterSpacing: "-0.025em",
-            lineHeight: 1.15,
+            lineHeight: 1.2,
             textAlign: "center",
-            maxWidth: "700px",
+            maxWidth: "650px",
           }}
         >
           {title}
@@ -47,31 +53,36 @@ export default async function Image({
         {description && (
           <div
             style={{
-              fontSize: "22px",
+              fontSize: "18px",
               fontWeight: 400,
               color: "#94a3b8",
-              marginTop: "20px",
+              marginTop: "14px",
               textAlign: "center",
               maxWidth: "550px",
+              lineHeight: 1.4,
             }}
           >
             {description}
           </div>
         )}
-        <div
-          style={{
-            marginTop: "32px",
-            fontSize: "16px",
-            fontWeight: 500,
-            color: "#64748b",
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-          }}
-        >
-          CtroEnv Blog
-        </div>
+        {tags.length > 0 && (
+          <div
+            style={{
+              marginTop: "28px",
+              display: "flex",
+              gap: "10px",
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
+            {tags.map((tag) => (
+              <OgTagPill key={tag}>{tag}</OgTagPill>
+            ))}
+          </div>
+        )}
+        <OgAccentLine />
       </div>
-    ),
-    { ...size }
+    </OgContainer>,
+    { ...size },
   )
 }

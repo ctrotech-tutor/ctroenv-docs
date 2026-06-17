@@ -30,12 +30,13 @@ export const metadata: Metadata = {
     "Define, validate, and infer types for environment variables with zero runtime dependencies. CtroEnv gives you beautiful error messages, framework adapters, and CLI tooling.",
   metadataBase: new URL("https://ctroenv.vercel.app"),
   alternates: {
-    canonical: "/",
+    canonical: "https://ctroenv.vercel.app",
   },
   openGraph: {
     title: "CtroEnv — Type-Safe Environment Variables",
     description:
       "Define, validate, and infer types for environment variables with zero runtime dependencies.",
+    url: "https://ctroenv.vercel.app",
     siteName: "CtroEnv",
     type: "website",
     locale: "en_US",
