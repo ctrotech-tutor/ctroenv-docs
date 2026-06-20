@@ -127,26 +127,14 @@ The output is grouped by error category ("Missing required" vs "Invalid") and in
 colorized ANSI output when the terminal supports it. Respects `NO_COLOR`, `CI`, and
 `TERM=dumb` environment variables.
 
-## Error Message Factory
+## Error Code Type
 
-The internal error factory functions are exported for custom validators:
+The `ErrorCode` constant uses `as const`, making each value a literal type. Access the
+union type via `ErrorCodeType`:
 
 ```ts
-import { errMissing, errType, errInvalid, errWrap } from "@ctroenv/core"
+import { ErrorCode, type ErrorCodeType } from "@ctroenv/core"
 
-// Create a missing-required error
-errMissing("DATABASE_URL", {
-  description: "Primary database connection",
-}) // code: "missing_required"
-
-// Create a type mismatch error
-errType("PORT", "string", "a number", {
-  suggestion: "Ensure the value is a numeric string.",
-}) // code: "type_mismatch"
-
-// Create an invalid value error
-errInvalid("API_URL", "not-a-url", "Invalid URL format") // code: "invalid_value"
-
-// Create an error with a custom code
-errWrap("KEY", value, "Custom error", ErrorCode.ValidationFailed)
+const code: ErrorCodeType = ErrorCode.MissingRequired
+// "missing_required" | "type_mismatch" | "invalid_value" | "validation_failed"
 ```

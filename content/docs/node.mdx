@@ -87,8 +87,9 @@ const env = defineEnv(schema, {
 })
 ```
 
-This is equivalent to not passing a source at all (the default auto-detection uses
-`process.env` in Node.js), but is useful for explicit readability.
+Unlike the default `detectSource()` (which checks `import.meta.env` first, then
+falls back to `process.env`), `nodeSource()` only reads from `process.env`. Use
+it when you want to skip the `import.meta.env` check.
 
 ## parseEnvFile()
 

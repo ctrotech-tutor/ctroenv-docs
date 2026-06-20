@@ -14,7 +14,11 @@ ctroenv check [options]
 
 ## Options
 
-Same as [validate](/docs/cli/validate).
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `--source` | `string` | `.env` | Path to the env file to check |
+| `--strict` | `boolean` | `false` | Validate values against schema (not just keys) |
+| `--json` | `boolean` | `false` | Output as JSON |
 
 ## CI Integration
 

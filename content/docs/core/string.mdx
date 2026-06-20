@@ -26,7 +26,7 @@ string().parse(null)     // ❌ type error
 
 ## Refinements
 
-String refinements add additional constraints. They can be chained in any order.
+String refinements add additional constraints. Chain `.min()`, `.max()`, `.url()`, `.email()`, `.port()`, `.regex()` before `.secret()`, `.optional()`, `.describe()`. Reason: `.secret()` and `.optional()` return a generic wrapper that drops type-specific methods like `.url()`.
 
 ### .url()
 
@@ -134,7 +134,7 @@ const env = defineEnv({
 ```ts
 const env = defineEnv({
   DATABASE_URL: string().url().describe("Primary database connection"),
-  JWT_SECRET: string().secret().min(32),
+  JWT_SECRET: string().min(32).secret(),
   NICKNAME: string().min(2).max(30).optional(),
   EMAIL: string().email(),
   PORT: string().port(),

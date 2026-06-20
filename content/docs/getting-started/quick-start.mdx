@@ -27,7 +27,7 @@ export const env = defineEnv({
   DEBUG: boolean().optional(),
 
   // Required: secret key (masked in logs)
-  JWT_SECRET: string().secret().min(32),
+  JWT_SECRET: string().min(32).secret(),
 
   // Optional: Redis URL
   REDIS_URL: string().url().optional(),
@@ -91,9 +91,9 @@ try {
 
 ## 5. Provide Environment Variables
 
-### Using process.env (default)
+### Using the environment
 
-By default, `defineEnv()` reads from `process.env`. Set variables before running:
+By default, `defineEnv()` reads from `import.meta.env` or `process.env`. Set variables before running:
 
 ```bash
 export DATABASE_URL="postgresql://..."

@@ -4,8 +4,8 @@ description: "The main entry point for creating a type-safe environment variable
 ---
 # defineEnv()
 
-The core function that validates environment variables against a schema and returns a typed,
-frozen environment object.
+The core function that validates environment variables against a schema and returns a typed
+environment object.
 
 ## Signature
 
@@ -45,14 +45,14 @@ interface DefineEnvOptions {
 
 #### source
 
-Controls where environment variables are read from. If omitted, `detectSource()` auto-detects
-using `process.env` (Node.js) or `import.meta.env` (Vite).
+Controls where environment variables are read from. If omitted, `detectSource()` checks
+`import.meta.env` first, then falls back to `process.env`.
 
 ```ts
-// Auto-detect (process.env or import.meta.env)
+// Auto-detect
 defineEnv(schema)
 
-// Explicit Node.js source
+// Explicit Node.js source (from @ctroenv/node)
 defineEnv(schema, { source: nodeSource() })
 
 // From .env files
@@ -93,8 +93,7 @@ const env = defineEnv({
 // env.NODE_ENV → "dev" | "prod"
 ```
 
-When no `.secret()` variables are present, the object is deeply frozen.
-When `.secret()` variables exist, the object is wrapped in a **Proxy** that:
+The object is always wrapped in a **Proxy** that:
 
 - Masks secret value reads with `"********"`
 - Exposes raw values via `env.meta.get("KEY")`

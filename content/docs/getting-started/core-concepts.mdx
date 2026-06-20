@@ -82,7 +82,7 @@ output type automatically.
 2. Reads the value from the environment source
 3. Runs the validator
 4. Collects all errors (doesn't throw on first error)
-5. Returns a deeply frozen, typed object — or throws `CtroEnvError` with all errors
+5. Returns a typed Proxy object — or throws `CtroEnvError` with all errors
 
 ```ts
 const env = defineEnv(schema, {
@@ -97,7 +97,7 @@ An environment source is any object with a `get(key: string) => string | undefin
 
 | Source | Package | Description |
 |---|---|---|
-| Default (`detectSource`) | `@ctroenv/core` | Auto-detects `process.env` or `import.meta.env` |
+| Default (`detectSource`) | `@ctroenv/core` | Checks `import.meta.env` first, falls back to `process.env` |
 | `loadEnv()` | `@ctroenv/node` | Reads from `.env` files |
 | `nodeSource()` | `@ctroenv/node` | Wraps `process.env` explicitly |
 | `viteSource()` | `@ctroenv/vite` | Reads from `import.meta.env` |

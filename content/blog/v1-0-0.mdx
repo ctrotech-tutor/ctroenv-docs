@@ -44,7 +44,7 @@ const env = defineEnv({
   DATABASE_URL: string().url(),
   PORT: number().port().default(3000),
   NODE_ENV: pick(["dev", "staging", "prod"]),
-  JWT_SECRET: string().secret().min(32),
+  JWT_SECRET: string().min(32).secret(),
 })
 ```
 
