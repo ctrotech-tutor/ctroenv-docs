@@ -1,14 +1,25 @@
-import { Sidebar } from "@/components/layout/sidebar"
+import { Subnav } from "@/components/subnav"
+import { SidebarWrapper } from "@/components/layout/sidebar-wrapper"
+import { SidebarPanel } from "@/components/sidebar-panel"
+import { AskAIButton } from "@/components/ask-ai-button"
+import { SidebarProvider } from "@/lib/sidebar-context"
+import { getSidebar } from "@/lib/sidebar"
+import type { ReactNode } from "react"
 
-export default function DocsLayout({ children }: { children: React.ReactNode }) {
+export default function DocsLayout({ children }: { children: ReactNode }) {
+  const groups = getSidebar()
+
   return (
-    <div className="mx-auto flex w-full max-w-screen-2xl flex-1">
-      <aside className="hidden md:block w-56 xl:w-64 shrink-0 border-r border-border/50">
-        <div className="py-6">
-          <Sidebar />
+    <SidebarProvider>
+      <Subnav groups={groups} />
+        <div className="flex">
+          <SidebarWrapper groups={groups} />
+          <SidebarPanel />
+          <main className="min-w-0 flex-1">
+            {children}
+          </main>
         </div>
-      </aside>
-      <main className="flex-1 min-w-0">{children}</main>
-    </div>
+        <AskAIButton />
+      </SidebarProvider>
   )
 }

@@ -1,120 +1,69 @@
-import fs from "fs"
-import path from "path"
-import yaml from "js-yaml"
+import { compileMDX } from "next-mdx-remote/rsc";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeShiki from "@shikijs/rehype";
+import remarkGfm from "remark-gfm";
 
-export interface Frontmatter {
-  title?: string
-  description?: string
-}
+import type { ReactNode } from "react";
 
-export interface ContentPage {
-  source: string
-  frontmatter: Frontmatter
-  slug: string
-  section: string
-  toc: TocItem[]
-}
+import { extractTOC, type TOCItem } from "./toc";
+import { InstallTabs } from "@/components/install-tabs";
 
-export interface TocItem {
-  id: string
-  text: string
-  level: number
-}
+export type MDXResult = {
+  content: ReactNode;
+  toc: TOCItem[];
+};
 
-const contentDir = path.join(process.cwd(), "content", "docs")
+export async function compile(mdxSource: string): Promise<MDXResult> {
+  const toc = extractTOC(mdxSource);
 
-export function getContentPaths(): string[] {
-  const paths: string[] = []
+  const { content } = await compileMDX({
+    source: mdxSource,
 
-  function walk(dir: string, prefix: string) {
-    if (!fs.existsSync(dir)) return
-    let hasIndex = false
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      if (entry.isDirectory()) {
-        walk(path.join(dir, entry.name), `${prefix}${entry.name}/`)
-      } else if (entry.isFile() && entry.name.endsWith(".mdx")) {
-        const slug = entry.name.replace(/\.mdx$/, "")
-        if (slug === "index") {
-          hasIndex = true
-        } else {
-          paths.push(`${prefix}${slug}`)
-        }
-      }
-    }
-    if (hasIndex && prefix) {
-      paths.push(prefix.slice(0, -1))
-    }
-    if (prefix === "" && hasIndex) {
-      paths.push(prefix)
-    }
-  }
+    components: {
+      InstallTabs,
+    },
 
-  walk(contentDir, "")
-  return paths
-}
+    options: {
+      parseFrontmatter: false,
 
-export function parseFrontmatter(
-  raw: string
-): { frontmatter: Frontmatter; body: string; toc: TocItem[] } {
-  const frontmatter: Frontmatter = {}
-  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n*/)
-  if (!match) return { frontmatter, body: raw, toc: [] }
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
 
-  const rawFm = match[1]
-  const body = raw.slice(match[0].length)
+        rehypePlugins: [
+          rehypeSlug,
 
-  try {
-    const parsed = yaml.load(rawFm) as Record<string, unknown>
-    if (parsed?.title && typeof parsed.title === "string")
-      frontmatter.title = parsed.title
-    if (parsed?.description && typeof parsed.description === "string")
-      frontmatter.description = parsed.description
-  } catch {
-    for (const line of rawFm.split(/\r?\n/)) {
-      const colonIdx = line.indexOf(":")
-      if (colonIdx === -1) continue
-      const key = line.slice(0, colonIdx).trim()
-      const value = line.slice(colonIdx + 1).trim().replace(/^['"]|['"]$/g, "")
-      if (key === "title") frontmatter.title = value
-      if (key === "description") frontmatter.description = value
-    }
-  }
+          [
+            rehypeAutolinkHeadings,
+            {
+              behavior: "wrap",
+            },
+          ],
 
-  const toc = extractToc(body)
-  return { frontmatter, body, toc }
-}
+          [
+            rehypeShiki,
+            {
+              themes: {
+                light: "github-light",
+                dark: "github-dark",
+              },
 
-export function extractToc(body: string): TocItem[] {
-  const items: TocItem[] = []
-  const headingRe = /^#{2,3}\s+(.+)$/gm
-  let match: RegExpExecArray | null
-  while ((match = headingRe.exec(body)) !== null) {
-    const text = match[1]
-      .replace(/`([^`]+)`/g, "$1")
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    const id = text
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-    const level = match[0].startsWith("###") ? 3 : 2
-    items.push({ id, text, level })
-  }
-  return items
-}
+              defaultLanguage: "plaintext",
+              keepBackground: false,
+              defaultColor: "light",
 
-export function loadContent(
-  contentPath: string
-): ContentPage | null {
-  let filePath = path.join(contentDir, `${contentPath}.mdx`)
-  if (!fs.existsSync(filePath)) {
-    filePath = path.join(contentDir, contentPath, "index.mdx")
-    if (!fs.existsSync(filePath)) return null
-  }
+              // enables:
+              // `const a = 1{:ts}`
+              inline: "tailing-curly-colon",
+            },
+          ],
+        ],
+      },
+    },
+  });
 
-  const raw = fs.readFileSync(filePath, "utf-8")
-  const { frontmatter, body, toc } = parseFrontmatter(raw)
-  const parts = contentPath.split("/")
-  const section = parts[0]
-  const slug = parts.slice(1).join("/") || contentPath
-  return { source: body, frontmatter, slug, section, toc }
+  return {
+    content,
+    toc,
+  };
 }

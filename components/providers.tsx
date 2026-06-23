@@ -1,15 +1,23 @@
 "use client"
 
-import { ThemeProvider as NextThemesProvider } from "next-themes"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { ThemeProvider } from "next-themes"
 import { SearchProvider } from "@/lib/search-context"
+import { AiProvider } from "@/lib/ai-context"
+import type { ReactNode } from "react"
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children }: { children: ReactNode }) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <TooltipProvider>
-        <SearchProvider>{children}</SearchProvider>
-      </TooltipProvider>
-    </NextThemesProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <SearchProvider>
+        <AiProvider>
+          {children}
+        </AiProvider>
+      </SearchProvider>
+    </ThemeProvider>
   )
 }

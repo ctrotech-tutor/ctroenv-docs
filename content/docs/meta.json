@@ -1,0 +1,29 @@
+{
+  "pages": [
+    "getting-started",
+    "getting-started/quick-start",
+    "getting-started/core-concepts",
+    "core/define-env",
+    "core/string",
+    "core/number",
+    "core/boolean",
+    "core/pick",
+    "core/chainable",
+    "core/refinements",
+    "core/errors",
+    "core/schema-composition",
+    "cli/index",
+    "cli/validate",
+    "cli/generate",
+    "cli/check",
+    "cli/docs",
+    "cli/init",
+    "cli/configuration",
+    "node",
+    "vite",
+    "nextjs",
+    "migration/from-t3-env",
+    "migration/from-envalid",
+    "migration/from-dotenv"
+  ]
+}

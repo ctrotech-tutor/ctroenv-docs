@@ -11,6 +11,8 @@ import {
   Download,
 } from "lucide-react"
 import { packages } from "@/lib/navigation"
+import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/layout/footer"
 
 const features = [
   {
@@ -43,7 +45,9 @@ const stats = [
 
 export default function Home() {
   return (
-    <div className="relative">
+    <>
+      <Navbar />
+      <div className="relative">
       {/* Grid background */}
       <div className="absolute inset-0 -z-10 h-[600px] overflow-hidden">
         <div
@@ -191,5 +195,7 @@ export default function Home() {
         </div>
       </div>
     </div>
+      <Footer />
+    </>
   )
 }

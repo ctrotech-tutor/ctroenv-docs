@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import { MdxContent } from "@/components/mdx-content"
-import { CodeBlocks } from "@/components/code-blocks"
-import { getAllPosts, loadBlogPost } from "@/lib/blog"
+import { getBlogPost, getAllDocSlugs } from "@/lib/content"
+import { getAllPosts } from "@/lib/blog"
+import { CodeCopyProvider } from "@/components/code-copy"
 
 const baseUrl = "https://ctroenv.vercel.app"
 
@@ -17,29 +17,29 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const posts = getAllPosts()
-  const post = posts.find((p) => p.slug === slug)
-  if (!post) return {}
+  const meta = posts.find((p) => p.slug === slug)
+  if (!meta) return {}
 
   const url = `${baseUrl}/blog/${slug}`
 
   return {
-    title: post.title,
-    description: post.description,
+    title: meta.title,
+    description: meta.description,
     alternates: { canonical: url },
     openGraph: {
-      title: post.title,
-      description: post.description,
+      title: meta.title,
+      description: meta.description,
       url,
       type: "article",
-      publishedTime: post.date,
-      authors: [post.author],
-      tags: post.tags,
-      siteName: "CtroEnv",
+      publishedTime: meta.date,
+      authors: [meta.author],
+      tags: meta.tags,
+      siteName: "ctroenv",
     },
     twitter: {
       card: "summary_large_image",
-      title: post.title,
-      description: post.description,
+      title: meta.title,
+      description: meta.description,
     },
   }
 }
@@ -52,8 +52,10 @@ export default async function BlogPost({
   const { slug } = await params
   const posts = getAllPosts()
   const meta = posts.find((p) => p.slug === slug)
-  const content = loadBlogPost(slug)
-  if (!meta || !content) notFound()
+  if (!meta) notFound()
+
+  const result = await getBlogPost(slug)
+  if (!result) notFound()
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -105,9 +107,11 @@ export default async function BlogPost({
           )}
         </div>
       </header>
-      <CodeBlocks>
-        <MdxContent source={content.source} />
-      </CodeBlocks>
+      <CodeCopyProvider>
+        <div className="prose flex-1 text-foreground/90 max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:group/heading prose-a:no-underline hover:prose-a:underline">
+          {result.content}
+        </div>
+      </CodeCopyProvider>
     </article>
   )
 }

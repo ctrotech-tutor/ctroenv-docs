@@ -1,115 +1,69 @@
-import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import Script from "next/script"
 import { Providers } from "@/components/providers"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { SearchDialog } from "@/components/search-dialog"
-import { MobileTabs } from "@/components/layout/mobile-tabs"
+import { Inter, JetBrains_Mono } from "next/font/google"
+import type { ReactNode } from "react"
 import "./globals.css"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fontSans = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
 })
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fontMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 })
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-}
-
-export const metadata: Metadata = {
+export const metadata = {
   title: {
-    template: "%s — CtroEnv",
-    default: "CtroEnv — Type-Safe Environment Variables for TypeScript",
+    template: "%s | ctroenv",
+    default: "ctroenv — Type-Safe Environment Variables for TypeScript",
   },
   description:
-    "Define, validate, and infer types for environment variables with zero runtime dependencies. CtroEnv gives you beautiful error messages, framework adapters, and CLI tooling.",
+    "Define, validate, and infer types for environment variables with zero runtime dependencies. Beautiful error messages, framework adapters, and CLI tooling.",
   metadataBase: new URL("https://ctroenv.vercel.app"),
-  alternates: {
-    canonical: "https://ctroenv.vercel.app",
-  },
   openGraph: {
-    title: "CtroEnv — Type-Safe Environment Variables",
-    description:
-      "Define, validate, and infer types for environment variables with zero runtime dependencies.",
-    url: "https://ctroenv.vercel.app",
-    siteName: "CtroEnv",
+    siteName: "ctroenv",
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "/og?title=ctroenv&description=Type-Safe Environment Variables for TypeScript",
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CtroEnv — Type-Safe Environment Variables",
+    title: "ctroenv",
     description:
       "Define, validate, and infer types for environment variables with zero runtime dependencies.",
   },
   icons: {
-    icon: "/favicon.svg",
-  },
-  robots: {
-    index: true,
-    follow: true,
+    icon: "/favicon.ico",
   },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable}`}
-      suppressHydrationWarning
-    >
-      <body className="min-h-dvh bg-background font-sans antialiased">
+    <html lang="en" className={`${fontSans.variable} ${fontMono.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              name: "CtroEnv",
+              name: "ctroenv",
               url: "https://ctroenv.vercel.app",
               description:
                 "Define, validate, and infer types for environment variables with zero runtime dependencies.",
-              potentialAction: {
-                "@type": "SearchAction",
-                target: {
-                  "@type": "EntryPoint",
-                  urlTemplate:
-                    "https://ctroenv.vercel.app/docs?search={search_term_string}",
-                },
-                "query-input": "required name=search_term_string",
-              },
             }),
           }}
         />
-        {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
-          <Script
-            defer
-            src={process.env.NEXT_PUBLIC_UMAMI_URL || "https://umami.is/script.js"}
-            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-          />
-        )}
-        <Providers>
-          <SearchDialog />
-          <div className="flex min-h-dvh flex-col overflow-x-hidden max-w-[100vw] pb-16 md:pb-0">
-            <Header />
-            <div className="flex flex-1">
-              <main className="flex-1">{children}</main>
-            </div>
-            <Footer />
-          </div>
-          <MobileTabs />
-        </Providers>
+      </head>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

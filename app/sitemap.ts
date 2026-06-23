@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 import type { MetadataRoute } from "next"
-import { getContentPaths } from "@/lib/mdx"
+import { getAllDocSlugs } from "@/lib/content"
 import { getBlogSlugs } from "@/lib/blog"
 
 const baseUrl = "https://ctroenv.vercel.app"
@@ -39,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   const contentDir = path.join(process.cwd(), "content", "docs")
-  const docPaths = getContentPaths()
+  const docPaths = getAllDocSlugs().map((s) => s.join("/"))
   for (const docPath of docPaths) {
     const filePath = path.join(contentDir, `${docPath}.mdx`)
     const lastmod = getFileLastmod(filePath)
